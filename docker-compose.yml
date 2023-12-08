@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - 3307:3306
+    networks:
+      - mysql_network
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: user 
+      MYSQL_PASSWORD: 123456
+      MYSQL_DATABASE: forumdb
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+
+
+    volumes:
+      - ./back-end/db/init.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - mysql_volume:/var/lib/mysql
+
+
+
+volumes:
+  mysql_volume:
+
+networks:
+  mysql_network:
+
