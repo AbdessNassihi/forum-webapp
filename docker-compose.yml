@@ -2,29 +2,50 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     ports:
-      - 3307:3306
+      - 3306:3306
     networks:
-      - mysql_network
+      - mysql_node_network
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: azerty
       MYSQL_USER: user 
-      MYSQL_PASSWORD: 123456
+      MYSQL_PASSWORD: azerty
       MYSQL_DATABASE: forumdb
-      SERVICE_TAGS: dev
+      SERVICE_TAGS: prod
       SERVICE_NAME: mysql
 
 
     volumes:
       - ./back-end/db/init.sql:/docker-entrypoint-initdb.d/0_init.sql
-      - mysql_volume:/var/lib/mysql
+  
+  nodeapp:
+    container_name: nodeapp_c
+    build: ./back-end
+    image: nodeapp
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+    volumes:
+      - C:\Users\abdel\nodeapp:/code
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: 'user'
+      DB_PASSWORD: 'azerty'
+      DB_NAME: forumdb
+      DB_CONNECTION_LIMIT: 20
+      SERVICE_TAGS: prod
+      SERVICE_NAME: nodeapp
+    depends_on:
+      - mysql
+    networks:
+      - mysql_node_network
 
-
-
-volumes:
-  mysql_volume:
 
 networks:
-  mysql_network:
+  mysql_node_network:
+
 

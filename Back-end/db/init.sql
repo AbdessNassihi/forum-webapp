@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     is_admin TINYINT NOT NULL,
     img_url VARCHAR(800) NOT NULL,
+    textuser VARCHAR(800) NOT NULL,
+    salt VARCHAR(800) NOT NULL,
     PRIMARY KEY (iduser),
     UNIQUE INDEX iduser_UNIQUE (iduser ASC) VISIBLE,
     UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,

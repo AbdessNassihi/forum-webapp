@@ -5,8 +5,13 @@ const path = require('path')
 
 const PORT = 3000;
 const app = express();
+const userEndpoints = require('./endpoints/user');
 app.use(express.json());
-app.use('/', (req, res) => { res.send({ message: 'test ssl server is oke' }) });
+app.use('/users', userEndpoints);
+app.use('/', (req, res) => { res.send({ message: 'server is oke' }) });
+app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Endpoint not in server' } }) });
+
+
 
 const options = {
     key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
