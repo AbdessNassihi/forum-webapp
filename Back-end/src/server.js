@@ -1,14 +1,24 @@
 const express = require('express');
 const https = require('https');
+const session = require('express-session');
+const passport = require('passport');
 const fs = require('fs');
 const path = require('path')
 
 const PORT = 3000;
 const app = express();
 const userEndpoints = require('./endpoints/user');
+const authEndpoints = require('./endpoints/auth');
+
 app.use(express.json());
+app.use(session({ secret: 'secret-cookie', resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 app.use('/users', userEndpoints);
-app.use('/', (req, res) => { res.send({ message: 'server is oke' }) });
+app.use('/login', authEndpoints);
+app.use('/', (req, res) => { res.send({ message: 'server is running' }) });
 app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Endpoint not in server' } }) });
 
 
