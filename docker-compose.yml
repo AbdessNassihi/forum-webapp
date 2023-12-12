@@ -30,7 +30,7 @@ services:
     expose:
       - 3000
     volumes:
-      - C:\Users\abdel\nodeapp:/code
+      - ./back-end/uploads:/usr/code/uploads
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
