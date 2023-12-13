@@ -1,5 +1,5 @@
 const database = require('../../db/dbconnection');
-const QUERY = require('../../db/query');
+const { USER_QUERY: QUERY } = require('../../db/query');
 const bcrypt = require('bcrypt');
 const express = require('express');
 const { check, validationResult } = require('express-validator');
@@ -97,7 +97,7 @@ router.get('/images', async (req, res) => {
     try {
         const [rows] = await database.query(QUERY.SELECT_USERS);
         if (!rows || rows.length == 0) {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No images found' } });
+            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No images of users found' } });
         } else {
 
             const desFields = ['iduser', 'img_url'];
@@ -115,10 +115,9 @@ router.get('/images', async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error retrieving images', log: error } });
+        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error retrieving images of users', log: error } });
 
     }
-
 });
 
 router.get('/images/:id', async (req, res) => {
@@ -132,10 +131,12 @@ router.get('/images/:id', async (req, res) => {
             res.sendFile(path.join('/usr/code', rows[0].img_url));
         }
     } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error retrieving image', log: error } });
+        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error retrieving image of user', log: error } });
     }
 
 });
+
+
 
 router.get('/:id', async (req, res) => {
 
@@ -172,6 +173,27 @@ router.post('/', validateUser, validateCredentials, async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error creating user', log: error } });
+    }
+});
+router.post('/follow/:id', async (req, res) => {
+
+    const iduser = req.body.iduser;
+    const [rows] = await database.query(QUERY.SELECT_USER, iduser);
+    if (!rows[0]) {
+        res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+    }
+    try {
+        const follower_id = parseInt(req.params.id);
+        const result = await database.query(QUERY.NEW_FOLLOW, [follower_id, iduser])
+        if (result) {
+            res.status(201).json({ code: 201, status: 'Created', message: 'User is following the requested user', data: result });
+        }
+        else {
+            res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error following the user' } });
+        }
+
+    } catch {
+        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error following the user', log: error } });
     }
 });
 

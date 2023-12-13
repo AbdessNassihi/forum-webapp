@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS threads (
     iduser INT,
     title VARCHAR(255) NOT NULL,
     img_url VARCHAR(800),
+    follow_only TINYINT,
     PRIMARY KEY (idthread),
     FOREIGN KEY (iduser) REFERENCES users(iduser),
     UNIQUE INDEX title_UNIQUE (title ASC) VISIBLE

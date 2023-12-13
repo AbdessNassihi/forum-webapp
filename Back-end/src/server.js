@@ -9,6 +9,7 @@ const PORT = 3000;
 const app = express();
 const userEndpoints = require('./endpoints/user');
 const authEndpoints = require('./endpoints/auth');
+const threadEndpoints = require('./endpoints/thread');
 
 app.use(express.json());
 app.use(session({ secret: 'secret-cookie', resave: false, saveUninitialized: false }));
@@ -18,6 +19,7 @@ app.use(passport.session());
 
 app.use('/users', userEndpoints);
 app.use('/login', authEndpoints);
+app.use('/threads', threadEndpoints);
 app.use('/', (req, res) => { res.send({ message: 'server is running' }) });
 app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Endpoint not in server' } }) });
 
