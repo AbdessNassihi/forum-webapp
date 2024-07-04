@@ -30,6 +30,8 @@ services:
     expose:
       - 3000
     volumes:
+      - ./back-end:/usr/code
+      - /usr/code/node_modules
       - ./back-end/uploads:/usr/code/uploads
     environment:
       DB_HOST: mysql
