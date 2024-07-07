@@ -225,7 +225,6 @@ router.put('/:id', validateUser, validateCredentials, async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-
     try {
         const iduser = parseInt(req.params.id);
         const [rows] = await database.query(QUERY.SELECT_USER, iduser);
@@ -239,8 +238,8 @@ router.delete('/:id', async (req, res) => {
                 res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error deleting user' } });
             }
         }
-    } catch {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error deleting user', log: error } });
+    } catch (error) {
+        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error deleting user', log: error.message } });
     }
 });
 

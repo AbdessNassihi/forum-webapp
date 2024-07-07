@@ -20,7 +20,7 @@ app.use(passport.session());
 app.use('/users', userEndpoints);
 app.use('/login', authEndpoints);
 app.use('/threads', threadEndpoints);
-app.use('/', (req, res) => { res.send({ message: 'server is runninggggggg' }) });
+app.use('/', (req, res) => { res.send({ message: 'server is running' }) });
 app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Endpoint not in server' } }) });
 
 
