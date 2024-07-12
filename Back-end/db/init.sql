@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS threads (
     img_url VARCHAR(800),
     follow_only TINYINT,
     PRIMARY KEY (idthread),
-    FOREIGN KEY (iduser) REFERENCES users(iduser),
-    UNIQUE INDEX title_UNIQUE (title ASC) VISIBLE
+    UNIQUE INDEX title_UNIQUE (title ASC) VISIBLE,
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE
 );
 
 
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS posts (
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pinned TINYINT,
     PRIMARY KEY (idpost),
-    FOREIGN KEY (idthread) REFERENCES threads(idthread),
-    FOREIGN KEY (iduser) REFERENCES users(iduser)
+    FOREIGN KEY (idthread) REFERENCES threads(idthread) ON DELETE CASCADE,
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS commentaries (
@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS commentaries (
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     idcom_com INT,
     PRIMARY KEY (idcom),
-    FOREIGN KEY (iduser) REFERENCES users(iduser),
-    FOREIGN KEY (idpost) REFERENCES posts(idpost),
-    FOREIGN KEY (idcom_com) REFERENCES commentaries(idcom)
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idpost) REFERENCES posts(idpost) ON DELETE CASCADE,
+    FOREIGN KEY (idcom_com) REFERENCES commentaries(idcom) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS user_user (
@@ -72,4 +72,5 @@ CREATE TABLE IF NOT EXISTS user_threads (
     FOREIGN KEY (user_id) REFERENCES users(iduser),
     FOREIGN KEY (thread_id) REFERENCES threads(idthread)
 );
+
 

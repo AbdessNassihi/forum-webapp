@@ -19,7 +19,7 @@ services:
 
     volumes:
       - ./back-end/db/init.sql:/docker-entrypoint-initdb.d/0_init.sql
-      - ./back-end/database:/var/lib/mysql
+      - ./back-end/data:/var/lib/mysql
   
   nodeapp:
     container_name: nodeapp_c

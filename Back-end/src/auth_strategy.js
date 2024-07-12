@@ -5,20 +5,11 @@ const database = require('../db/dbconnection');
 const QUERY = require('../db/query');
 
 
-passport.serializeUser((user, done) => { done(null, user[0].iduser) });
 
-passport.deserializeUser(async (id, done) => {
-    try {
-        const [row] = await database.query(QUERY.SELECT_USER, id);
-        if (!row) { return done(null, false); }
-        done(null, row);
-    } catch {
-        done(null, false);
-    }
-});
 
 
 passport.use(new LocalStrategy(async (username, password, done) => {
+    console.log(username);
 
     try {
         const [row] = await database.query(QUERY.FIND_ONE, username)
@@ -35,4 +26,3 @@ passport.use(new LocalStrategy(async (username, password, done) => {
 }));
 
 module.exports = passport;
-
