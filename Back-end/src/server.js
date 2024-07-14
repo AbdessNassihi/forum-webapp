@@ -1,21 +1,35 @@
 const express = require('express');
 const https = require('https');
+
 const session = require('express-session');
+const sessionStore = require('./session_store');
 const passport = require('passport');
+
 const fs = require('fs');
-const path = require('path')
+const path = require('path');
 
 const PORT = 3000;
 const app = express();
+
 const userEndpoints = require('./endpoints/user');
 const authEndpoints = require('./endpoints/auth');
 const threadEndpoints = require('./endpoints/thread');
 
 app.use(express.json());
-app.use(session({ secret: 'secret-cookie', resave: false, saveUninitialized: false }));
+
+/* USER SESSION */
+app.use(session({
+    secret: 'secret-cookie',
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 60000 * 60, }
+})
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
+/* ENDPOINTS */
 app.use('/auth', authEndpoints);
 app.use('/users', userEndpoints);
 app.use('/threads', threadEndpoints);
@@ -29,5 +43,5 @@ const options = {
 };
 const server = https.createServer(options, app);
 server.listen(PORT, () => {
-    console.log('Server listening on port 3000');
+    console.log(`Server listening on port ${PORT}`);
 });

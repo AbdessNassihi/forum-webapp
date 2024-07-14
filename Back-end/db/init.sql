@@ -73,4 +73,11 @@ CREATE TABLE IF NOT EXISTS user_threads (
     FOREIGN KEY (thread_id) REFERENCES threads(idthread)
 );
 
+CREATE TABLE IF NOT EXISTS user_sessions (
+    session_id VARCHAR(128) NOT NULL,
+    expires INT(11) UNSIGNED NOT NULL,
+    data TEXT,
+    PRIMARY KEY (session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
