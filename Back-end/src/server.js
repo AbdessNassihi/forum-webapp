@@ -14,6 +14,10 @@ const app = express();
 const userEndpoints = require('./endpoints/user');
 const authEndpoints = require('./endpoints/auth');
 const threadEndpoints = require('./endpoints/thread');
+const postEndpoints = require('./endpoints/post');
+const commentEnpoints = require('./endpoints/comments');
+const subscriptionEndpoints = require('./endpoints/subscription');
+const followEndpoints = require('./endpoints/follow');
 
 app.use(express.json());
 
@@ -33,6 +37,10 @@ app.use(passport.session());
 app.use('/auth', authEndpoints);
 app.use('/users', userEndpoints);
 app.use('/threads', threadEndpoints);
+app.use('/posts', postEndpoints);
+app.use('/comments', commentEnpoints);
+app.use('/subscription', subscriptionEndpoints);
+app.use('/follow', followEndpoints);
 app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Endpoint not in server' } }) });
 
 

@@ -7,45 +7,47 @@ const USER_QUERY = {
     UPDATE_PASSWORD: 'UPDATE users SET password = ?, salt = ? WHERE iduser = ?',
     UPDATE_IMAGE: 'UPDATE users SET img_url = ? WHERE iduser = ?',
     DELETE_USER: 'DELETE FROM users WHERE iduser = ?',
-    FIND_ONE: 'SELECT * FROM users WHERE username = ?',
-    FIND_ONE_MAIL: 'SELECT * FROM users WHERE email = ?',
-    FIND_FOLLOWING: 'SELECT * FROM users INNER JOIN user_user ON users.iduser = user_user.following_id WHERE user_user.follower_id = ?',
-    FIND_FOLLOWERS: 'SELECT * FROM users INNER JOIN user_user ON users.iduser = user_user.follower_id WHERE user_user.following_id = ?',
-    NEW_FOLLOW: 'INSERT INTO user_user (follower_id, following_id) VALUES (?, ?)'
-
+    FOLLOW_USER: 'INSERT INTO user_follows (idfollower, idfollowing) VALUES (?, ?)',
+    UNFOLLOW_USER: 'DELETE FROM user_follows where idfollower = ? AND idfollowing = ?',
+    SELECT_FOLLOWERS: 'SELECT * FROM users INNER JOIN user_follows ON users.iduser = user_follows.idfollower WHERE user_follows.idfollowing = ?',
+    SELECT_FOLLOWING: 'SELECT * FROM users INNER JOIN user_follows ON users.iduser = user_follows.idfollowing WHERE user_follows.idfollower = ?'
 };
 
 const THREAD_QUERY = {
-    SELECT_THREAD: 'SELECT * FROM threads WHERE idthread = ?',
+    SELECT_ALL_THREADS: 'SELECT * FROM threads ORDER BY idthread ASC',
     SELECT_THREADS: 'SELECT * FROM threads WHERE follow_only = 0 ORDER BY idthread ASC',
+    SELECT_THREAD: 'SELECT * FROM threads WHERE idthread = ?',
     SELECT_THREADS_OF_USER: 'SELECT * FROM threads WHERE iduser = ? ORDER BY idthread ASC',
-    SELECT_FOLLOWING_THREADS: 'SELECT * FROM threads INNER JOIN user_threads ON threads.idthread = user_threads.thread_id WHERE user_threads.user_id = ?',
+    SELECT_POSTS: 'SELECT * FROM posts WHERE idthread = ? ORDER BY pinned DESC, score DESC',
     NEW_THREAD: 'INSERT INTO threads (iduser, title, img_url, follow_only) VALUES (?, ?, ?, ?)',
+    NEW_POST: 'INSERT INTO posts (idthread, iduser, content) VALUES (?, ?, ?)',
     DELETE_THREAD: 'DELETE FROM threads WHERE idthread = ?',
-    UPDATE_THREAD: 'UPDATE threads SET title = ?, img_url = ?, follow_only = ? WHERE idthread = ?',
-    FIND_ONE: 'SELECT * FROM threads WHERE title = ?',
-    NEW_FOLLOW: 'INSERT INTO user_threads (user_id, thread_id) VALUES (?, ?)'
-
-
+    UPDATE_TITLE: 'UPDATE threads SET title = ? WHERE idthread = ?',
+    UPDATE_FOLLOWONLY: 'UPDATE threads SET follow_only = ? WHERE idthread = ?',
+    UPDATE_IMAGE: 'UPDATE threads SET img_url = ? WHERE idthread = ?',
+    SUBSCRIBE_TO_THREAD: 'INSERT INTO subscriptions (iduser, idthread) VALUES (?, ?)',
+    UNSUBSCRIBE_TO_THREAD: 'DELETE FROM subscriptions WHERE iduser = ? AND idthread = ?'
 };
 
 const POST_QUERY = {
-    SELECT_POSTS: 'SELECT * FROM posts INNER JOIN threads ON posts.idthread = threads.idthread WHERE threads.follow_only = 0 ORDER BY posts.score DESC',
-    SELECT_POSTS_AUTH: 'SELECT * FROM posts INNER JOIN user_threads ON posts.idthread = user_threads.thread_id WHERE user_threads.user_id = ?',
-    SELECT_POSTS_OF_THREAD: 'SELECT * FROM posts WHERE idthread = ? ORDER BY pinned, score DESC',
-    SELECT_POSTS_OF_USER: 'SELECT * FROM posts WHERE iduser = ? ORDER BY pinned, score DESC',
-    NEW_POST: 'INSERT INTO posts (idthread, iduser, content, score, time, pinned) VALUES (?, ?, ?, ?, ?, ?)',
-    DELETE_POST: 'DELETE FROM posts WHERE idpost = ?',
-    UPDATE_POST: 'UPDATE posts SET content = ? WHERE idpost = ?'
+    SELECT_POST: 'SELECT * FROM posts WHERE idpost = ?',
+    UPDATE_POST: 'UPDATE posts SET content = ? WHERE idpost = ?',
+    UPDATE_SCORE: 'UPDATE posts SET score = ? WHERE idpost = ?',
+    UPDATE_PINNED: 'UPDATE posts SET pinned = ? WHERE idpost = ?',
+    DELETE_POST: 'DELETE from POSTS WHERE idpost = ?',
+    SELECT_COMMENTS: 'SELECT * FROM commentaries WHERE idpost = ? ORDER BY idcom DESC',
+    NEW_COMMENT: 'INSERT INTO commentaries (idpost, iduser, content) VALUES (?, ?, ?)'
 };
 
-const COM_QUERY = {
-    SELECT_COM: 'SELECT * FROM commentaries WHERE idpost = ? ORDER BY score DESC',
-    DELETE_COM: 'DELETE FROM commentaries WHERE idcom = ?'
+const COMMENT_QUERY = {
+    SELECT_COMMENT: 'SELECT * FROM commentaries WHERE idcom = ?',
+    DELETE_COMMENT: 'DELETE FROM commentaries WHERE idcom = ?',
+    SELECT_SUBCOMMENTS: 'SELECT * FROM sub_commentaries WHERE idcom = ?',
+    SELECT_SUBCOMMENT: 'SELECT * FROM sub_commentaries WHERE idsubcom = ?'
 }
 
 
 
 
 
-module.exports = { USER_QUERY, THREAD_QUERY, POST_QUERY, COM_QUERY };
+module.exports = { USER_QUERY, THREAD_QUERY, POST_QUERY, COMMENT_QUERY };

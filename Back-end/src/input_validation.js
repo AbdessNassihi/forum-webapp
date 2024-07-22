@@ -1,11 +1,12 @@
 
-/* VALIDATING THE CREDENTIALS*/
+/* VALIDATING THE INPUTS*/
 
 const { check } = require('express-validator');
 const PasswordValidator = require('password-validator');
 
-const passwordSchema = new PasswordValidator();
 
+/*USER CREDENTIALS CHECKS */
+const passwordSchema = new PasswordValidator();
 passwordSchema
     .is().min(8)
     .is().max(50)
@@ -26,8 +27,16 @@ const validatePasswordReq = check('password').isLength({ min: 8, max: 50 }).with
         return true;
     });
 
+/*THREADS */
+
+const validateThreadTitle = check('title').exists().withMessage('Title is required')
+    .isLength({ min: 10, max: 100 }).withMessage('Title must be between 10 and 100 characters')
+    .matches(/^[a-zA-Z0-9\s]+$/).withMessage('Title must contain only letters, numbers, and spaces')
+
+
 module.exports = {
     validateUsernameReq,
     validatePasswordReq,
-    validateAllReq: [validateUsernameReq, validateEmailReq, validatePasswordReq]
+    validateAllReq: [validateUsernameReq, validateEmailReq, validatePasswordReq],
+    validateThreadTitle
 };

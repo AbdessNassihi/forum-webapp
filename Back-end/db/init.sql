@@ -36,12 +36,13 @@ CREATE TABLE IF NOT EXISTS posts (
     idthread INT,
     iduser INT,
     content TEXT NOT NULL,
-    score INT,
+    score INT DEFAULT 0,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    pinned TINYINT,
+    pinned TINYINT DEFAULT 0,
     PRIMARY KEY (idpost),
     FOREIGN KEY (idthread) REFERENCES threads(idthread) ON DELETE CASCADE,
     FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE
+    
 );
 
 CREATE TABLE IF NOT EXISTS commentaries (
@@ -49,29 +50,38 @@ CREATE TABLE IF NOT EXISTS commentaries (
     iduser INT,
     idpost INT,
     score INT,
+    content TEXT NOT NULL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    idcom_com INT,
     PRIMARY KEY (idcom),
     FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE,
-    FOREIGN KEY (idpost) REFERENCES posts(idpost) ON DELETE CASCADE,
-    FOREIGN KEY (idcom_com) REFERENCES commentaries(idcom) ON DELETE CASCADE
+    FOREIGN KEY (idpost) REFERENCES posts(idpost) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS user_user (
-    follower_id INT,
-    following_id INT,
-    PRIMARY KEY (follower_id, following_id),
-    FOREIGN KEY (follower_id) REFERENCES users(iduser),
-    FOREIGN KEY (following_id) REFERENCES users(iduser)
+CREATE TABLE IF NOT EXISTS sub_commentaries (
+    idsubcom INT NOT NULL AUTO_INCREMENT,
+    idcom INT,
+    content TEXT NOT NULL,
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (idsubcom),
+    FOREIGN KEY (idcom) REFERENCES commentaries(idcom) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS user_threads (
-    user_id INT,
-    thread_id INT,
-    PRIMARY KEY (user_id, thread_id),
-    FOREIGN KEY (user_id) REFERENCES users(iduser),
-    FOREIGN KEY (thread_id) REFERENCES threads(idthread)
+CREATE TABLE IF NOT EXISTS user_follows (
+    idfollower INT,
+    idfollowing INT,
+    PRIMARY KEY (idfollower, idfollowing),
+    FOREIGN KEY (idfollower) REFERENCES users(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idfollowing) REFERENCES users(iduser) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    iduser INT,
+    idthread INT,
+    PRIMARY KEY (iduser, idthread),
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idthread) REFERENCES threads(idthread) ON DELETE CASCADE
+);
+
 
 CREATE TABLE IF NOT EXISTS user_sessions (
     session_id VARCHAR(128) NOT NULL,

@@ -18,19 +18,24 @@ const imageFilter = function (req, file, cb) {
     cb(null, true);
 };
 
-const getImagePath = (req, user) => {
+const getImagePath = (req, user, profileImage) => {
     if (req.file) {
         return req.file.path;
     }
     if (user) { return user.img_url }
-    return path.join('/uploads', 'default_image.jpg');
+    else {
+        if (profileImage) return path.join('/uploads', 'default_ProfileImage.jpg');
+        else { return path.join('/uploads', 'default_ThreadImage.jpg') }
+
+    }
+
 }
 
 const upload = multer({ storage: storage, fileFilter: imageFilter });
 
 
 const handleImageUpload = (req, res, next) => {
-    upload.single('profileImage')(req, res, (err) => {
+    upload.single('image')(req, res, (err) => {
         if (err) {
             return res.status(400).json({ code: 400, status: 'Bad Request', message: err.message });
         }
