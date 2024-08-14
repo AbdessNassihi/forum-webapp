@@ -1,0 +1,19 @@
+.bottom-nav {
+  border-top: 1px solid #dfdfdf;
+  height: 40px;
+}
+
+.bottom-nav .nav-link {
+    color: #000;
+    font-size: 1.5rem;
+  }
+  
+  .bottom-nav .nav-link:hover {
+    color: #007bff;
+  }
+  
+  .profile-image {
+    width: 24px; 
+    height: 24px; 
+    border-radius: 50%; 
+}

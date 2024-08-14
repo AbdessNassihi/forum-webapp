@@ -1,0 +1,53 @@
+.postcard {
+    margin-top: 20px;
+    padding-left: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.postcard .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.postcard .card-text {
+    font-size: 1rem;
+    color: #555;
+}
+
+.postcard .card-body:last-child {
+    display: flex;
+    justify-content: space-around;
+}
+
+.postcard .card-link {
+    text-decoration: none;
+    color: inherit; /* Inherit color from parent */
+}
+
+.postcard .card-link:hover {
+    text-decoration: none; /* Ensure no underline on hover */
+    color: #555; /* Optional: change color on hover */
+}
+.postcard .card-link svg {
+    margin-right: 10px; /* Space between icon and text */
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.thread-title {
+
+    padding: 2px 8px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #3590e0; 
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    text-decoration: none; 
+}

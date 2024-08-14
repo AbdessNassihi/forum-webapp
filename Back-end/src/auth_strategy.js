@@ -12,8 +12,8 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
+
     try {
-        console.log('deser');
         const [user] = await database.query(QUERY.SELECT_USER, id);
         if (!user[0]) { throw new Error("User Not Found"); }
         done(null, user[0]);
@@ -24,12 +24,16 @@ passport.deserializeUser(async (id, done) => {
 
 
 passport.use(new LocalStrategy(async (username, password, done) => {
+
     try {
-        const [user] = await database.query(QUERY.FIND_ONE, username);
-        if (!user[0]) { return done(null, false, { message: 'Invalid Credentials' }); }
+        const [user] = await database.query(QUERY.FIND_USER, username);
+
+        if (!user[0]) {
+            return done(null, false, { path: 'username', msg: 'User not found' });
+        }
         else {
             const isPasswordCorrect = bcrypt.compareSync(password, user[0].password)
-            if (!isPasswordCorrect) { return done(null, false, { message: 'Invalid Credentials' }); }
+            if (!isPasswordCorrect) { return done(null, false, { path: 'password', msg: 'Invalid password' }); }
             return done(null, user[0]);
         }
 

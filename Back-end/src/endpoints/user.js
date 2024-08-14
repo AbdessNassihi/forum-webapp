@@ -32,11 +32,14 @@ router.get('/', async (req, res) => {
 
 // Selecting a specefic user
 router.get('/:iduser', async (req, res) => {
+    console.log('test');
     try {
+
         const iduser = parseInt(req.params.iduser);
+        console.log(iduser);
         const [rows] = await database.query(QUERY.SELECT_USER, [iduser]);
         if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'User retrieved successfully', data: rows[0] });
+            res.status(200).json({ code: 200, status: 'OK', message: 'User retrieved successfully', user: rows[0] });
         } else {
             res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
         }
@@ -80,19 +83,25 @@ router.delete('/:iduser', async (req, res) => {
 
 // Updating the username
 router.put('/username', validateUsernameReq, async (req, res) => {
+
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
         return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors.array() });
     }
+    console.log(req.user);
     try {
         const iduser = req.user.iduser;
+
         const { username } = req.body;
         const result = await database.query(QUERY.UPDATE_USERNAME, [username, iduser]);
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
         res.status(200).json({ code: 200, status: 'OK', message: 'Username updated successfully', data: result });
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
-            res.status(400).json({ error: { code: 400, status: 'Bad Request', message: 'Username already used' } });
+            let errors = [];
+            errors.push({ path: 'username', msg: 'username already used' });
+            return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors });
         } else {
             res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating username', log: error.message } });
         }
@@ -105,7 +114,7 @@ router.put('/textuser', async (req, res) => {
         const iduser = req.user.iduser;
         const { textuser } = req.body;
         const result = await database.query(QUERY.UPDATE_TEXTUSER, [textuser, iduser]);
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
         res.status(200).json({ code: 200, status: 'OK', message: 'Text user updated successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating text user', log: error.message } });
@@ -124,7 +133,7 @@ router.put('/password', validatePasswordReq, async (req, res) => {
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
         const result = await database.query(QUERY.UPDATE_PASSWORD, [hashedPassword, salt, iduser]);
-        if (!result.affectedRows) throw new Error('Updating password failed');
+        if (!result[0].affectedRows) throw new Error('Updating password failed');
         res.status(200).json({ code: 200, status: 'OK', message: 'Password updated successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating password', log: error.message } });
@@ -138,7 +147,7 @@ router.put('/image', handleImageUpload, async (req, res) => {
         const [rows] = await database.query(QUERY.SELECT_USER, [iduser]);
         const imagePath = getImagePath(req, rows[0], true);
         const result = await database.query(QUERY.UPDATE_IMAGE, [imagePath, iduser]);
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
         res.status(200).json({ code: 200, status: 'OK', message: 'Profile image updated successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating profile image', log: error.message } });

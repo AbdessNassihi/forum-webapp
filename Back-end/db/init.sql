@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    is_admin TINYINT NOT NULL,
+    is_admin TINYINT  DEFAULT 0,
     img_url VARCHAR(800) NOT NULL,
     textuser VARCHAR(800) NOT NULL,
     salt VARCHAR(800) NOT NULL,

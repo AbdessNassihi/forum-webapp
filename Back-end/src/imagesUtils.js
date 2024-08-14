@@ -36,8 +36,11 @@ const upload = multer({ storage: storage, fileFilter: imageFilter });
 
 const handleImageUpload = (req, res, next) => {
     upload.single('image')(req, res, (err) => {
+
         if (err) {
-            return res.status(400).json({ code: 400, status: 'Bad Request', message: err.message });
+            let errors = [];
+            errors.push({ path: 'image', msg: err.message });
+            return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors });
         }
         next();
     });

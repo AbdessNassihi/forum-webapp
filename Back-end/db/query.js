@@ -1,7 +1,8 @@
 const USER_QUERY = {
     SELECT_USERS: 'SELECT * FROM users ORDER BY iduser ASC',
     SELECT_USER: 'SELECT * FROM users WHERE iduser = ?',
-    NEW_USER: 'INSERT INTO users (username, email, password, is_admin, img_url, textuser, salt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    FIND_USER: 'SELECT * FROM users WHERE username = ?',
+    NEW_USER: 'INSERT INTO users (email, username, password, is_admin, img_url, textuser, salt) VALUES (?, ?, ?, ?, ?, ?, ?)',
     UPDATE_USERNAME: 'UPDATE users SET username = ? WHERE iduser = ?',
     UPDATE_TEXTUSER: 'UPDATE users SET textuser = ? WHERE iduser = ?',
     UPDATE_PASSWORD: 'UPDATE users SET password = ?, salt = ? WHERE iduser = ?',

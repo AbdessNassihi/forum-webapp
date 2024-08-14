@@ -1,0 +1,64 @@
+.sidebar-header-icon {
+    font-size: 24px;
+    margin-left: auto;
+    margin-top: 20px;
+}
+
+.sidebar-logo {
+    color: inherit;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.logo-img {
+    width: 60px;
+    margin-right: 10px;
+}
+
+.logo-text {
+    color: #3590e0;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+
+.sidebar-item {
+    color: #000 !important;
+    transition: background-color 0.3s, border 0.3s;
+}
+
+.sidebar-item:hover {
+    background-color: #e0e0e0;
+    border-radius: 5px;
+}
+
+.sidebar-item i {
+    font-size: 1.5rem; 
+}
+
+
+
+.badge-spacing {
+    margin-left: 10px;
+}
+
+.sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px; 
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+
+.logout-button {
+    width: auto; /* Make button full width or adjust as needed */
+}
+
