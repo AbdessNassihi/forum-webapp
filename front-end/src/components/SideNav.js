@@ -1,17 +1,14 @@
 import { useContext, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
-import Badge from 'react-bootstrap/Badge';
-
-import { CDBSidebar, CDBSidebarHeader, CDBSidebarContent, CDBSidebarMenu, CDBSidebarMenuItem, CDBSidebarFooter } from 'cdbreact';
+import MenuItem from "./MenuItem";
+import { CDBSidebar, CDBSidebarHeader, CDBSidebarContent, CDBSidebarMenu, CDBSidebarFooter } from 'cdbreact';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt, faSignInAlt } from '@fortawesome/free-solid-svg-icons';
-
 import '../styles/SideNav.css';
 import Logo from '../img/logo.png';
-
 import { UserContext } from "../context/UserContext";
-import axios from 'axios';
+import { apiCall } from '../utils/Api';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -19,79 +16,58 @@ const SideNav = () => {
     const { user, logout } = useContext(UserContext);
     const navigate = useNavigate();
     const location = useLocation();
+
     useEffect(() => {
         if (location.state?.showToast) {
-            if (location.state.toastType === 'success') {
-                toast.success(location.state.message, { hideProgressBar: true, autoClose: 2000 });
-            } else if (location.state.toastType === 'error') {
-                toast.error(location.state.message, { hideProgressBar: true, autoClose: 2000 });
-            }
+            const { toastType, message } = location.state;
+            toast[toastType](message, { hideProgressBar: true, autoClose: 2000 });
+            navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location.state]);
+    }, [location.state, navigate, location.pathname]);
 
-    const handleAuth = () => {
+    const handleAuth = async () => {
         if (user) {
-            axios.get('http://localhost:8000/auth/logout', {
-                withCredentials: true,
-                validateStatus: function (status) {
-                    return status >= 200 && status < 500;
+            try {
+                const response = await apiCall('get', '/auth/logout');
+                if (response.status === 200) {
+                    logout();
+                    navigate('/login', { state: { showToast: true, message: response.data.message, toastType: 'success' } });
                 }
-            })
-                .then(response => {
-                    if (response.status === 200) {
-                        logout();
-                        navigate('/login', { state: { showToast: true, message: response.data.message, toastType: 'success', } });
-                    }
-                })
+            } catch (error) {
+                toast.error('Failed to log out. Please try again.', { hideProgressBar: true, autoClose: 2000 });
+            }
+        } else {
+            navigate('/login');
         }
-        navigate('/login');
-    }
-
-    const handleNavigation = (path) => {
-        if (user) { navigate(path); }
-        else {
-            navigate('/login', { state: { showToast: true, message: 'You need to be logged in to access this page.', toastType: 'error', } });
-        }
-
     };
 
-
-
     return (
-        <div className='sidebar-container' style={{ display: 'flex', height: '100vh', overflow: 'hidden', border: '1px solid #dfdfdf' }}>
+        <div className="sidebar-container">
             <ToastContainer />
             <CDBSidebar textColor="#000" backgroundColor="#ffffff">
                 <CDBSidebarHeader prefix={<i className="fa fa-bars fa-large sidebar-header-icon"></i>} style={{ border: 'none' }}>
-                    <a href="/" className="sidebar-logo">
+                    <div className="sidebar-logo" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
                         <img src={Logo} alt="Logo" className="logo-img" />
                         <span className="logo-text">Postit</span>
-                    </a>
+                    </div>
                 </CDBSidebarHeader>
 
                 <CDBSidebarContent className="sidebar-content">
                     <CDBSidebarMenu>
-                        <div onClick={() => navigate('/')}>
-                            <CDBSidebarMenuItem icon="home" className="sidebar-item">Home</CDBSidebarMenuItem>
-                        </div>
-                        <div onClick={() => handleNavigation('/explore')}>
-                            <CDBSidebarMenuItem icon="compass" className="sidebar-item">Explore</CDBSidebarMenuItem>
-                        </div>
-                        <div onClick={(user) => handleNavigation('/create')}>
-                            <CDBSidebarMenuItem icon="plus-circle" className="sidebar-item">Create</CDBSidebarMenuItem>
-                        </div>
-                        <div onClick={() => handleNavigation('/messages')}>
-                            <CDBSidebarMenuItem icon="envelope" className="sidebar-item">
-                                Messages
-                                <Badge className="badge-spacing" bg="secondary">5</Badge>
-                            </CDBSidebarMenuItem>
-                        </div>
-                        <div onClick={() => handleNavigation('/profile')}>
-                            <CDBSidebarMenuItem
-                                icon='user'
-                                className="sidebar-item">
-                                Profile
-                            </CDBSidebarMenuItem>
-                        </div>
+                        <MenuItem icon="home" label="Home" path="/" user={user} isSidebar={true} />
+                        <MenuItem icon="compass" label="Explore" path="/explore" user={user} isSidebar={true} />
+                        <MenuItem
+                            icon="plus-circle"
+                            label="Create"
+                            path="/create"
+                            user={user}
+                            isSidebar={true}
+                            subItems={[
+                                { label: 'New Post', icon: 'fas fa-pencil-alt', path: '/create/post' },
+                                { label: 'New Thread', icon: 'fas fa-comments', path: '/create/thread' }
+                            ]}
+                        />
+                        <MenuItem icon="user" label="Profile" path="/profile" user={user} isSidebar={true} />
                     </CDBSidebarMenu>
                 </CDBSidebarContent>
 
@@ -102,7 +78,6 @@ const SideNav = () => {
                         </Button>
                     </div>
                 </CDBSidebarFooter>
-
             </CDBSidebar>
         </div>
     );

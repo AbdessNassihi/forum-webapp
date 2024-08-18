@@ -1,60 +1,47 @@
-import { useState, useContext, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import Badge from 'react-bootstrap/Badge';
 import PostCard from './PostCard';
 import Def_profile from '../img/default_ProfileImage.png';
-import axios from 'axios';
 import { UserContext } from "../context/UserContext";
 import { useNavigate } from 'react-router-dom';
-
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-const axiosInstance = axios.create({
-    withCredentials: true,
-    baseURL: 'http://localhost:8000',
-    validateStatus: (status) => status >= 200 && status < 500,
-});
+import useUserData from '../hooks/useUserData';
+import { toast } from 'react-toastify';
+import CardComp from './Card';
+import FormElement from "./FormGroup";
+import { apiCall } from "../utils/Api";
 
 const UserProfile = () => {
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
-    const [userData, setUserData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    const [username, setUsername] = useState({ modif: false, value: '' });
+    const {
+        username,
+        email,
+        textuser,
+        posts,
+        createdThreads,
+        followedThreads,
+        numFollowers,
+        numFollowings,
+        profileImage,
+        isLoading
+    } = useUserData(user, navigate);
+    const [usernameState, setUsernameState] = useState({ modif: false, value: '' });
+    const [postsState, setPostsState] = useState(null);
     const [password, setPassword] = useState({ modif: false, value: '****************' });
-    const [textuser, setTextUser] = useState({ modif: false, value: '' });
-    const [email, setEmail] = useState({ modif: false, value: '' });
-    const [profileImage, setProfileImage] = useState(null);
+    const [textuserState, setTextUserState] = useState({ modif: false, value: '' });
+    const [emailState, setEmailState] = useState({ modif: false, value: '' });
+    const [profileImageState, setProfileImageState] = useState(null);
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState({});
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await axiosInstance.get(`/users/${user}`);
-                if (response.status === 200) {
-                    setUserData(response.data.user);
-                } else {
-                    navigate('/', { state: { showToast: true, message: 'An error occurred, try again later.', toastType: 'error' } });
-                }
-            } catch (error) {
-                navigate('/', { state: { showToast: true, message: 'An error occurred, try again later.', toastType: 'error' } });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchUserData();
-    }, [user, navigate]);
-
-    useEffect(() => {
-        if (userData) {
-            setUsername({ modif: false, value: userData.username });
-            setTextUser({ modif: false, value: userData.textuser || '' });
-            setEmail({ modif: false, value: userData.email });
+        if (username) {
+            setUsernameState({ modif: false, value: username });
+            setTextUserState({ modif: false, value: textuser || '' });
+            setEmailState({ modif: false, value: email });
+            setPostsState(posts);
         }
-    }, [userData]);
+    }, [username, textuser, email]);
 
     const handleInputChange = (setter, key) => (event) => {
         setter({ modif: true, value: event.target.value });
@@ -65,25 +52,29 @@ const UserProfile = () => {
         const file = event.target.files[0];
         if (file) {
             setErrors((prevErrors) => ({ ...prevErrors, image: '' }));
-            setProfileImage(file);
+            setProfileImageState(file);
         }
+    };
+
+    const handleDeletePost = (postId) => {
+        setPostsState(postsState.filter(post => post.idpost !== postId));
     };
 
     const handleSaveChanges = useCallback(async () => {
         const apiCalls = [];
-        if (username.modif) {
-            apiCalls.push(axiosInstance.put('/users/username', { username: username.value }));
+        if (usernameState.modif) {
+            apiCalls.push(apiCall('put', '/users/username', { username: usernameState.value }));
         }
         if (password.modif) {
-            apiCalls.push(axiosInstance.put('/users/password', { password: password.value }));
+            apiCalls.push(apiCall('put', '/users/password', { password: password.value }));
         }
-        if (textuser.modif) {
-            apiCalls.push(axiosInstance.put('/users/textuser', { textuser: textuser.value }));
+        if (textuserState.modif) {
+            apiCalls.push(apiCall('put', '/users/textuser', { textuser: textuserState.value }));
         }
-        if (profileImage) {
+        if (profileImageState instanceof File) {
             const formData = new FormData();
-            formData.append('image', profileImage);
-            apiCalls.push(axiosInstance.put('/users/image', formData, {
+            formData.append('image', profileImageState);
+            apiCalls.push(apiCall('put', '/users/image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
@@ -102,24 +93,23 @@ const UserProfile = () => {
                     });
                     setErrors(errorObj);
                 } else if (response.status === 500) {
-                    console.error('There was an error while making changes');
+                    toast.error('Error while saving changes', { hideProgressBar: true, autoClose: 2000 });
                 } else {
-                    if (response.data.message === 'Username updated successfully') successObj['username'] = response.data.message;
-                    if (response.data.message === 'Password updated successfully') successObj['password'] = response.data.message;
-                    if (response.data.message === 'Text user updated successfully') successObj['textuser'] = response.data.message;
-                    if (response.data.message === 'Profile image updated successfully') successObj['image'] = response.data.message;
+                    if (response.data.message.includes('updated successfully')) {
+                        successObj[response.data.field] = response.data.message;
+                    }
                     setSuccess(successObj);
                 }
             });
 
-            setUsername((prev) => ({ ...prev, modif: false }));
+            setUsernameState((prev) => ({ ...prev, modif: false }));
             setPassword((prev) => ({ ...prev, modif: false }));
-            setTextUser((prev) => ({ ...prev, modif: false }));
+            setTextUserState((prev) => ({ ...prev, modif: false }));
 
         } catch (error) {
             toast.error('Error while saving changes', { hideProgressBar: true, autoClose: 2000 });
         }
-    }, [username, password, textuser, profileImage]);
+    }, [usernameState, password, textuserState, profileImageState]);
 
     if (isLoading) {
         return (
@@ -133,150 +123,168 @@ const UserProfile = () => {
         <div className="container">
             <div className="main-body">
                 <div className="row">
-                    <div className="col-lg-4">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="d-flex flex-column align-items-center text-center">
-                                    <img
-                                        src={profileImage ? URL.createObjectURL(profileImage) : Def_profile}
-                                        alt="Admin"
-                                        className="rounded-circle p-1 bg-primary"
-                                        width="110"
-                                    />
-                                    <div className="mt-3">
-                                        <h4>{username.value}</h4>
-                                        <p className="text-secondary mb-1">{email.value}</p>
-                                        <p className="text-secondary mb-1">{textuser.value}</p>
-                                    </div>
-                                </div>
-                                <hr className="my-4" />
-                                <ul className="list-group list-group-flush">
-                                    <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                                        <h6 className="mb-0">
-                                            Followers
-                                            <Badge className="badge-spacing" bg="secondary">150</Badge>
-                                        </h6>
-                                    </li>
-                                    <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                                        <h6 className="mb-0">
-                                            Followings
-                                            <Badge className="badge-spacing" bg="secondary">150</Badge>
-                                        </h6>
-                                    </li>
-                                    <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
-                                        <h5 className="mb-0">Your threads</h5>
-                                        <ul>
-                                            <li>
-                                                <a href="#" style={{ textDecoration: 'none' }}>thread title 1</a>
-                                            </li>
-                                        </ul>
-                                        <ul>
-                                            <li>
-                                                <a href="#" style={{ textDecoration: 'none' }}>thread title 2</a>
-                                            </li>
-                                        </ul>
-                                        <ul>
-                                            <li>
-                                                <a href="#" style={{ textDecoration: 'none' }}>thread title 3</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="col-lg-8">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="row mb-3">
-                                    <div className="col-sm-3">
-                                        <h6 className="mb-0">Username</h6>
-                                    </div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <input
-                                            type="text"
-                                            className={`form-control ${errors.username ? 'is-invalid' : 'is-valid'}`}
-                                            value={username.value}
-                                            onChange={handleInputChange(setUsername, 'username')}
-                                        />
-                                        {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-                                        {success.username && <div className="valid-feedback">{success.username}</div>}
-                                    </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-sm-3">
-                                        <h6 className="mb-0">Password</h6>
-                                    </div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <input
-                                            type="password"
-                                            className={`form-control ${errors.password ? 'is-invalid' : 'is-valid'}`}
-                                            value={password.value}
-                                            onChange={handleInputChange(setPassword, 'password')}
-                                        />
-                                        {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-                                        {success.password && <div className="valid-feedback">{success.password}</div>}
-                                    </div>
-                                </div>
 
-                                <div className="row mb-3">
-                                    <div className="col-sm-3">
-                                        <h6 className="mb-0">User Description</h6>
-                                    </div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <textarea
-                                            className={`form-control ${errors.textuser ? 'is-invalid' : 'is-valid'}`}
-                                            rows="4"
-                                            value={textuser.value}
-                                            onChange={handleInputChange(setTextUser, 'textuser')}
+                    <div className="col-12">
+                        <CardComp
+                            content={
+                                <>
+                                    <div className="d-flex flex-column align-items-center text-center">
+                                        <img
+                                            src={profileImageState ? URL.createObjectURL(profileImageState) : (profileImage ? URL.createObjectURL(profileImage) : Def_profile)}
+                                            alt="Profile"
+                                            className="rounded-circle p-1 bg-primary"
+                                            width="110"
                                         />
-                                        {errors.textuser && <div className="invalid-feedback">{errors.textuser}</div>}
-                                        {success.textuser && <div className="valid-feedback">{success.textuser}</div>}
+                                        <div className="mt-3">
+                                            <h4>{usernameState.value}</h4>
+                                            <p className="text-secondary mb-1">{emailState.value}</p>
+                                            <p className="text-secondary mb-1">{textuserState.value}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="row mb-3">
-                                    <div className="col-sm-3">
-                                        <h6 className="mb-0">Profile image</h6>
-                                    </div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <input
-                                            className={`form-control ${errors.image ? 'is-invalid' : 'is-valid'}`}
-                                            type="file" id="formFile"
-                                            onChange={handleFileChange}
-                                        />
-                                        {errors.image && <div className="invalid-feedback">{errors.image}</div>}
-                                        {success.image && <div className="valid-feedback">{success.image}</div>}
-                                    </div>
-                                </div>
-                                <div className="row">
-                                    <div className="col-sm-3"></div>
-                                    <div className="col-sm-9 text-secondary">
-                                        <input
-                                            type="button"
-                                            className="btn btn-primary px-4"
-                                            value="Save Changes"
-                                            onClick={handleSaveChanges}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-sm-12">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h5 className="d-flex align-items-center mb-3">Your posts</h5>
-                                        <PostCard />
-                                        <PostCard />
-                                        <PostCard />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                    <hr className="my-4" />
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                            <h6 className="mb-0">
+                                                Followers
+                                                <span style={{ marginLeft: '1.5em' }}>
+                                                    <Badge className="badge-spacing" bg="secondary">{numFollowers}</Badge>
+                                                </span>
+                                            </h6>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                            <h6 className="mb-0">
+                                                Followings
+                                                <span style={{ marginLeft: '1em' }}>
+                                                    <Badge className="badge-spacing" bg="secondary">{numFollowings}</Badge>
+                                                </span>
+                                            </h6>
+                                        </li>
+                                    </ul>
+                                </>
+                            }
+                        />
                     </div>
+
+                    <div className="col-12 mt-4">
+                        <CardComp
+                            title="Your Informations"
+                            content={
+                                <>
+                                    <FormElement
+                                        label="Username"
+                                        name="username"
+                                        placeholder={usernameState.value}
+                                        onChange={handleInputChange(setUsernameState, 'username')}
+                                        error={errors.username}
+                                        success={success.username}
+                                    />
+                                    <FormElement
+                                        label="Password"
+                                        type="password"
+                                        name="password"
+                                        placeholder={password.value}
+                                        onChange={handleInputChange(setPassword, 'password')}
+                                        error={errors.password}
+                                        success={success.password}
+                                    />
+                                    <FormElement
+                                        label="User Description"
+                                        name="textuser"
+                                        placeholder={textuserState.value}
+                                        onChange={handleInputChange(setTextUserState, 'textuser')}
+                                        error={errors.textuser}
+                                        success={success.textuser}
+                                        isTextarea
+                                    />
+                                    <FormElement
+                                        label="Profile Image"
+                                        type="file"
+                                        name="image"
+                                        onChange={handleFileChange}
+                                        error={errors.image}
+                                        success={success.image}
+                                    />
+                                    <div className="row">
+                                        <div className="col-sm-3"></div>
+                                        <div className="col-sm-9 text-secondary">
+                                            <input
+                                                type="button"
+                                                className="btn btn-primary px-4"
+                                                value="Save Changes"
+                                                onClick={handleSaveChanges}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            }
+                        />
+                    </div>
+
+                    <div className="col-12 mt-4">
+                        <CardComp
+                            title="Your Threads"
+                            content={
+                                <ul>
+                                    {createdThreads.map((thread) => (
+                                        <li key={thread.idthread} style={{ listStyleType: 'disc', marginLeft: '20px', position: 'relative' }}>
+                                            <a href="#" onClick={() => navigate(`/posts/${thread.idthread}/${thread.title}`)} style={{ textDecoration: 'none', color: "black" }}>{thread.title}</a>
+                                            <a
+                                                href="#"
+                                                style={{ textDecoration: 'underline', color: "blue", position: 'absolute', right: '0' }}
+                                                onClick={() => navigate(`/edit-thread/${thread.idthread}/${thread.title}`)}>
+                                                Edit
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            }
+                        />
+                    </div>
+                    <div className="col-12 mt-4">
+                        <CardComp
+                            title="Followed Threads"
+                            content={
+                                followedThreads.length > 0 ? (
+                                    <ul>
+                                        {followedThreads.map((thread) => (
+                                            <li key={thread.idthread}>
+                                                <a
+                                                    href="#"
+                                                    onClick={() => navigate(`/posts/${thread.idthread}/${thread.title}`)}
+                                                    style={{ textDecoration: 'none', color: 'black' }}
+                                                >
+                                                    {thread.title}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>You are not following any threads yet.</p>
+                                )
+                            }
+                        />
+                    </div>
+
+                    <div className="col-12 mt-4">
+                        <CardComp
+                            title="Your Posts"
+                            content={
+                                <>
+                                    {postsState.length > 0 ? (
+                                        postsState.map((post) => <PostCard key={post.idpost} post={post} onDelete={handleDeletePost} />)
+                                    ) : (
+                                        <p>You did not posted yet.</p>
+                                    )}
+                                </>
+                            }
+                        />
+                    </div>
+
                 </div>
             </div>
         </div>
+
+
     );
 };
 

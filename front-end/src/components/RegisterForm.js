@@ -1,8 +1,11 @@
-import { useState, createContext, useContext } from "react";
-import axios from 'axios';
-
+import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { apiCall } from '../utils/Api';
+import FormElement from "./FormGroup";
 
 const RegisterComponent = () => {
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -12,124 +15,132 @@ const RegisterComponent = () => {
     });
 
     const [errors, setErrors] = useState({});
-    const [succes, setSucces] = useState(false);
-    const [alert, setAlert] = useState({ message: 'Already a member?', class: "alert alert-light", href: 'http://localhost:3000/login' });
+    const [success, setSuccess] = useState(false);
+    const [alert, setAlert] = useState({
+        message: 'Already a member?',
+        class: "alert alert-light"
+    });
 
-
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData((prevData) => ({
+            ...prevData,
             [name]: value,
-        });
+        }));
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [name]: ''
+        }));
     };
 
+    const handleNavigateToLogin = () => {
+        navigate('/login');
+    };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:8000/auth/register', formData, {
-            validateStatus: function (status) {
-                return status >= 200 && status < 500;
+        try {
+            const response = await apiCall('post', '/auth/register', formData);
+
+            switch (response.status) {
+                case 201:
+                    setErrors({});
+                    setSuccess(true);
+                    setAlert({
+                        message: 'Welcome! ',
+                        class: "alert alert-success"
+                    });
+                    toast.success('Registration successful!', {
+                        hideProgressBar: true,
+                        autoClose: 2000
+                    });
+                    break;
+
+                case 400:
+                    const errorObj = {};
+                    response.data.errors.forEach(error => {
+                        errorObj[error.path] = error.msg;
+                    });
+                    setErrors(errorObj);
+                    break;
+
+                case 500:
+                    toast.error('An error occurred, please try again later', {
+                        hideProgressBar: true,
+                        autoClose: 2000
+                    });
+                    break;
+
+                default:
+                    toast.error('Unexpected error, please try again later', {
+                        hideProgressBar: true,
+                        autoClose: 2000
+                    });
+                    break;
             }
-        })
-            .then(response => {
-                switch (response.status) {
-                    case 201:
-                        setErrors({});
-                        setSucces(true);
-                        setAlert({ message: 'Welcome! ', class: "alert alert-success", href: 'http://localhost:3000/login' });
-                        break;
-                    case 400:
-                        const errorObj = {};
-                        response.data.errors.forEach(error => {
-                            errorObj[error.path] = error.msg;
-                        });
-                        setErrors(errorObj);
-                        break;
-                    case 500:
-                        setAlert({ message: 'An error occurred. Please try again later.', class: "alert alert-light", href: '' });
-                        break;
-                }
-            }).catch(error => {
-                setAlert({ message: 'An error occurred. Please try again later.', href: '' });
+        } catch (error) {
+            toast.error('An error occurred, please try again later', {
+                hideProgressBar: true,
+                autoClose: 2000
             });
+        }
     };
 
     return (
         <form className="row g-3" onSubmit={handleSubmit}>
-
             <div className="col-12">
                 <div className={alert.class} role="alert">
-                    {alert.message} {alert.href && <a href={alert.href} className="alert-link">navigate here to login.</a>}
+                    {alert.message} <span className="alert-link" style={{ cursor: 'pointer' }} onClick={handleNavigateToLogin}>navigate here to login.</span>
                 </div>
             </div>
 
+            <FormElement
+                placeholder="Email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                error={errors.email}
+                success={null}
+                disabled={success}
+            />
 
-            <div className="col-12">
-                <label htmlFor="validationServerEmail" className="form-label">Email</label>
-                <input
-                    type="text"
-                    className={`form-control ${errors.email ? 'is-invalid' : 'is-valid'}`}
-                    id="validationServerEmail"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    disabled={succes}
-                    readonly={succes}
+            <FormElement
+                placeholder="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+                error={errors.username}
+                success={null}
+                disabled={success}
+            />
 
-                />
-                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-            </div>
-            <div className="col-12">
-                <label htmlFor="validationServerUsername" className="form-label">Username</label>
-                <input
-                    type="text"
-                    className={`form-control ${errors.username ? 'is-invalid' : 'is-valid'}`}
-                    id="validationServerUsername"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    required
-                    disabled={succes}
-                    readonly={succes}
-                />
-                {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-            </div>
-            <div className="col-12">
-                <label htmlFor="validationServerPassword" className="form-label">Password</label>
-                <input
-                    type="password"
-                    className={`form-control ${errors.password ? 'is-invalid' : 'is-valid'}`}
-                    id="validationServerPassword"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={succes}
-                    readonly={succes}
-                />
-                {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-            </div>
-            <div className="col-12">
-                <label htmlFor="validationServerUserText" className="form-label">About you</label>
-                <textarea
-                    className="form-control"
-                    id="validationServerUserText"
-                    name="textuser"
-                    value={formData.textuser}
-                    onChange={handleChange}
-                    disabled={succes}
-                    readonly={succes}
-                />
-            </div>
+            <FormElement
+                placeholder="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                error={errors.password}
+                success={null}
+                disabled={success}
+            />
+
+            <FormElement
+                placeholder="Describe yourself"
+                name="textuser"
+                value={formData.textuser}
+                onChange={handleInputChange}
+                error={errors.textuser}
+                success={null}
+                isTextarea
+                disabled={success}
+            />
+
             <div className="col-12 d-flex justify-content-center">
-                <button className="btn btn-primary" type="submit">Register</button>
+                <button className="btn btn-primary" type="submit" disabled={success}>Register</button>
             </div>
-
         </form>
-
     );
 };
 

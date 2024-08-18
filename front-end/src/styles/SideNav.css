@@ -59,6 +59,21 @@
 
 
 .logout-button {
-    width: auto; /* Make button full width or adjust as needed */
+    width: auto; 
 }
 
+.sidebar-submenu {
+    margin-left: 20px;
+    padding: 5px 0;
+}
+
+.sidebar-subitem {
+    padding: 5px 0;
+    cursor: pointer;
+    color: #333;
+    display: block;
+}
+
+.sidebar-subitem:hover {
+    color: #007bff; /* Adjust hover color */
+}

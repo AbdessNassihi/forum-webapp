@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
-
+import { apiCall } from '../utils/Api';  // Import the API utility
 
 export const UserContext = createContext();
 
@@ -9,27 +8,29 @@ export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchUserStatus = async () => {
+            const storedUser = sessionStorage.getItem('user');
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+                setLoading(false);
+            } else {
+                try {
+                    const response = await apiCall('get', '/auth/status');
 
-        const storedUser = sessionStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setLoading(false);
-        } else {
-            axios.get('http://localhost:8000/auth/status', {
-                withCredentials: true,
-                validateStatus: function (status) {
-                    return status >= 200 && status < 500;
-                }
-            })
-                .then(response => {
-                    if (response.status == 200) {
+                    if (response.status === 200) {
                         setUser(response.data.user.iduser);
                         sessionStorage.setItem('user', JSON.stringify(response.data.user.iduser));
                     }
                     setLoading(false);
-                })
-        }
-    }, [user]);
+                } catch (error) {
+                    console.error('Failed to fetch user status:', error);
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchUserStatus();
+    }, []);
 
     const login = (newUserData) => {
         setUser(newUserData);
