@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS threads (
     idthread INT NOT NULL AUTO_INCREMENT,
     iduser INT,
     title VARCHAR(255) NOT NULL,
-    img_url VARCHAR(800),
-    follow_only TINYINT,
+    textthread VARCHAR(800) NOT NULL,
     PRIMARY KEY (idthread),
     UNIQUE INDEX title_UNIQUE (title ASC) VISIBLE,
     FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE
@@ -35,8 +34,8 @@ CREATE TABLE IF NOT EXISTS posts (
     idpost INT NOT NULL AUTO_INCREMENT,
     idthread INT,
     iduser INT,
+    title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    score INT DEFAULT 0,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     pinned TINYINT DEFAULT 0,
     PRIMARY KEY (idpost),
@@ -49,7 +48,6 @@ CREATE TABLE IF NOT EXISTS commentaries (
     idcom INT NOT NULL AUTO_INCREMENT,
     iduser INT,
     idpost INT,
-    score INT,
     content TEXT NOT NULL,
     time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (idcom),
@@ -57,14 +55,23 @@ CREATE TABLE IF NOT EXISTS commentaries (
     FOREIGN KEY (idpost) REFERENCES posts(idpost) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS sub_commentaries (
-    idsubcom INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS post_likes (
+    iduser INT,
+    idpost INT,
+    PRIMARY KEY (iduser, idpost),
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE,
+    FOREIGN KEY (idpost) REFERENCES posts(idpost) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments_likes (
+    iduser INT,
     idcom INT,
-    content TEXT NOT NULL,
-    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (idsubcom),
+    PRIMARY KEY (iduser, idcom),
+    FOREIGN KEY (iduser) REFERENCES users(iduser) ON DELETE CASCADE,
     FOREIGN KEY (idcom) REFERENCES commentaries(idcom) ON DELETE CASCADE
 );
+
+
 
 CREATE TABLE IF NOT EXISTS user_follows (
     idfollower INT,
@@ -73,6 +80,7 @@ CREATE TABLE IF NOT EXISTS user_follows (
     FOREIGN KEY (idfollower) REFERENCES users(iduser) ON DELETE CASCADE,
     FOREIGN KEY (idfollowing) REFERENCES users(iduser) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS subscriptions (
     iduser INT,

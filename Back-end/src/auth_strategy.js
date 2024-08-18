@@ -26,7 +26,7 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new LocalStrategy(async (username, password, done) => {
 
     try {
-        const [user] = await database.query(QUERY.FIND_USER, username);
+        const [user] = await database.query(QUERY.FIND_USER_AUTH, username);
 
         if (!user[0]) {
             return done(null, false, { path: 'username', msg: 'User not found' });
@@ -38,6 +38,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
         }
 
     } catch (error) {
+
         return done(error, null);
     }
 }));

@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:8.0
@@ -5,7 +7,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     ports:
-      - 3306:3306
+      - "3306:3306"
     networks:
       - mysql_node_network
     environment:
@@ -15,8 +17,6 @@ services:
       MYSQL_DATABASE: forumdb
       SERVICE_TAGS: prod
       SERVICE_NAME: mysql
-
-
     volumes:
       - ./back-end/db/init.sql:/docker-entrypoint-initdb.d/0_init.sql
       - ./back-end/data:/var/lib/mysql
@@ -26,9 +26,7 @@ services:
     build: ./back-end
     image: nodeapp
     ports:
-      - 8000:8000
-    expose:
-      - 8000
+      - "8000:8000"
     volumes:
       - ./back-end:/usr/code
       - /usr/code/node_modules
@@ -46,9 +44,19 @@ services:
       - mysql
     networks:
       - mysql_node_network
-
+  
+  reactapp:
+    container_name: reactapp_c
+    build: ./front-end
+    image: reactapp
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - nodeapp
+    networks:
+      - mysql_node_network
 
 networks:
   mysql_node_network:
-
-

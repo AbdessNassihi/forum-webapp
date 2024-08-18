@@ -14,33 +14,22 @@ const path = require('path');
 
 /* RETIRIEVING THREADS */
 
-// selecting the threads that are non only for subscribers
+// selecting all the threads
 router.get('/', async (req, res) => {
     try {
         const [rows] = await database.query(QUERY.SELECT_THREADS);
         if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Threads retrieved successfully', data: rows });
+            res.status(200).json({ code: 200, status: 'OK', message: 'Threads retrieved successfully', threads: rows });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No threads found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'No threads found', threads: [] });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving threads', log: error.message } });
     }
 })
 
-// selecting all the threads
-router.get('/all', async (req, res) => {
-    try {
-        const [rows] = await database.query(QUERY.SELECT_ALL_THREADS);
-        if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Threads retrieved successfully', data: rows });
-        } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No threads found' } });
-        }
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving threads', log: error.message } });
-    }
-})
+
+
 
 // selecting all the threads of a user
 router.get('users/:iduser', async (req, res) => {
@@ -96,21 +85,26 @@ router.get('/images/:idthread', async (req, res) => {
 
 
 /* Creating threads */
-router.post('/', validateThreadTitle, handleImageUpload, async (req, res) => {
+router.post('/', validateThreadTitle, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) { return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors.array() }); }
 
     try {
         const iduser = req.user.iduser;
-        const { title, follow_only } = req.body;
-        const imagePath = getImagePath(req, null, false);
-        const result = await database.query(QUERY.NEW_THREAD, [iduser, title, imagePath, follow_only]);
+        const { title, textthread } = req.body;
+        const result = await database.query(QUERY.NEW_THREAD, [iduser, title, textthread]);
 
-        if (!result.affectedRows) throw new Error('Thread creation failed');
+        if (!result[0].affectedRows) throw new Error('Thread creation failed');
         res.status(201).json({ code: 201, status: 'Created', message: 'Thread created successfully', data: result });
 
     } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while creating thread', log: error.message } });
+        if (error.code === 'ER_DUP_ENTRY') {
+            let errors = [];
+            errors.push({ path: 'title', msg: 'title already used' });
+            return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors });
+        } else {
+            return res.status(500).json({ code: 500, status: 'Internal Server Error', message: 'Error creating thread', log: error.message });
+        }
     }
 });
 
@@ -120,15 +114,15 @@ router.post('/', validateThreadTitle, handleImageUpload, async (req, res) => {
 
 // Updating the title
 router.put('/title/:idthread', validateThreadTitle, async (req, res) => {
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) { return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors.array() }); }
-
     try {
         const idthread = parseInt(req.params.idthread);
         const { title } = req.body;
         const result = await database.query(QUERY.UPDATE_TITLE, [title, idthread]);
 
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
         res.status(200).json({ code: 200, status: 'OK', message: 'Thread title updated successfully' });
 
     } catch (error) {
@@ -136,26 +130,15 @@ router.put('/title/:idthread', validateThreadTitle, async (req, res) => {
     }
 });
 
-// Updating the subscribtion mode
-router.put('/follow-only/:idthread', async (req, res) => {
-    try {
-        const idthread = parseInt(req.params.idthread);
-        const { follow_only } = req.body;
-        const result = await database.query(QUERY.UPDATE_FOLLOWONLY, [follow_only, idthread]);
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
-        res.status(200).json({ code: 200, status: 'OK', message: 'Thread mode updated successfully' });
 
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating thread mode', log: error.message } });
-    }
-});
 
 // Deleting a thread
 router.delete('/:idthread', async (req, res) => {
     try {
+        console.log('test');
         const idthread = parseInt(req.params.idthread);
         const result = await database.query(QUERY.DELETE_THREAD, [idthread]);
-        if (!result.affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
         res.status(200).json({ code: 200, status: 'OK', message: 'Thread deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while deleting thread', log: error.message } });
@@ -166,12 +149,12 @@ router.delete('/:idthread', async (req, res) => {
 /* RETRIEVING POSTS */
 router.get('/:idthread/posts', async (req, res) => {
     try {
-        const idthread = parseInt(req.params.id);
+        const idthread = parseInt(req.params.idthread);
         const [rows] = await database.query(QUERY.SELECT_POSTS, [idthread]);
         if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Posts of thread retrieved successfully', data: rows });
+            res.status(200).json({ code: 200, status: 'OK', message: 'Posts of thread retrieved successfully', posts: rows });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No posts found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'No posts found', posts: [] });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error retrieving posts of thread', log: error.message } });
@@ -184,9 +167,9 @@ router.post('/:idthread/posts', async (req, res) => {
     try {
         const idthread = parseInt(req.params.idthread);
         const iduser = req.user.iduser;
-        const { content } = req.body;
-        const result = await database.query(QUERY.NEW_POST, [idthread, iduser, content]);
-        if (!result.affectedRows) throw new Error('Post creation failed');
+        const { content, title } = req.body;
+        const result = await database.query(QUERY.NEW_POST, [idthread, iduser, content, title]);
+        if (!result[0].affectedRows) throw new Error('Post creation failed');
         res.status(201).json({ code: 201, status: 'Created', message: 'Post created successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while creating post', log: error.message } });

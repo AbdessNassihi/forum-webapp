@@ -11,7 +11,7 @@ router.post('/:idthread', async (req, res) => {
         const idthread = parseInt(req.params.idthread);
         const iduser = req.user.iduser;
         const result = await database.query(QUERY.SUBSCRIBE_TO_THREAD, [iduser, idthread]);
-        if (!result.affectedRows) throw new Error('Subscription failed');
+        if (!result[0].affectedRows) throw new Error('Subscription failed');
         res.status(201).json({ code: 201, status: 'Created', message: 'Subscribed successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while subscribing to thread', log: error.message } });
@@ -21,10 +21,11 @@ router.post('/:idthread', async (req, res) => {
 /* UNSUSCRIBING TO A THREAD */
 router.delete('/:idthread', async (req, res) => {
     try {
+
         const idthread = parseInt(req.params.idthread);
         const iduser = req.user.iduser;
         const result = await database.query(QUERY.UNSUBSCRIBE_TO_THREAD, [iduser, idthread]);
-        if (!result.affectedRows) throw new Error('Unsubscription failed');
+        if (!result[0].affectedRows) throw new Error('Unsubscription failed');
         res.status(200).json({ code: 200, status: 'OK', message: 'Unsubscribed successfully', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while unsubscribing to thread', log: error.message } });
