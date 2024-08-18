@@ -44,7 +44,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-/* ENDPOINTS */
+/* THE ENDPOINTS */
 app.use('/auth', authEndpoints);
 app.use('/users', userEndpoints);
 app.use('/threads', threadEndpoints);
