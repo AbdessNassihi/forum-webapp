@@ -15,7 +15,7 @@ const { USER_QUERY: QUERY } = require('../../db/query');
 
 
 
-/* USER AUTHENTICATION AND SESSION MANAGEMENT  */
+/* USER AUTHENTICATION AND SESSION MANAGEMENT */
 
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
