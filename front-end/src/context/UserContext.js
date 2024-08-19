@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import { apiCall } from '../utils/Api';  // Import the API utility
+import { apiCall } from '../services/api';
 
 export const UserContext = createContext();
 
@@ -23,7 +23,6 @@ export const UserProvider = ({ children }) => {
                     }
                     setLoading(false);
                 } catch (error) {
-                    console.error('Failed to fetch user status:', error);
                     setLoading(false);
                 }
             }

@@ -14,7 +14,6 @@ router.post('/:iduser', async (req, res) => {
         if (!result[0].affectedRows) throw new Error('Following user failed');
         res.status(200).json({ code: 200, status: 'OK', message: 'Followed successfully', data: result });
     } catch (error) {
-        console.log(error);
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while following user', log: error.message } });
     }
 });
@@ -42,7 +41,7 @@ router.get('/followers/:iduser', async (req, res) => {
         if (rows.length > 0) {
             res.status(200).json({ code: 200, status: 'OK', message: 'Followers retrieved successfully', data: rows });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Followers not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'Followers not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving followers', log: error.message } });
@@ -58,7 +57,7 @@ router.get('/following/:iduser', async (req, res) => {
         if (rows.length > 0) {
             res.status(200).json({ code: 200, status: 'OK', message: 'Followings retrieved successfully', data: rows });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Followins not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'Followins not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving followings', log: error.message } });

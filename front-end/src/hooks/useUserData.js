@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiCall } from '../utils/Api';
+import { apiCall } from '../services/api';
 
 const useUserData = (userId, navigate) => {
     const [userState, setUserState] = useState({
@@ -49,7 +49,6 @@ const useUserData = (userId, navigate) => {
                             isLoading: false,
                         }));
                     } else {
-                        console.error('Failed to retrieve profile image');
                         setUserState(prevState => ({ ...prevState, isLoading: false }));
                     }
 

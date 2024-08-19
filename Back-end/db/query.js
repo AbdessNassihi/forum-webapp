@@ -1,5 +1,4 @@
 const USER_QUERY = {
-    SELECT_USERS: 'SELECT * FROM users ORDER BY iduser ASC',
     SELECT_USER: 'SELECT * FROM users WHERE iduser = ?',
     FIND_USER_AUTH: 'SELECT * FROM users where username = ?',
     FIND_USER: 'SELECT users.iduser, users.username, users.email, users.textuser, users.is_admin, (SELECT COUNT(*) FROM user_follows WHERE user_follows.idfollowing = users.iduser) AS num_followers, (SELECT COUNT(*) FROM user_follows WHERE user_follows.idfollower = users.iduser) AS num_followings, EXISTS (SELECT 1 FROM user_follows WHERE user_follows.idfollower = ? AND user_follows.idfollowing = users.iduser) AS is_following FROM users WHERE users.username = ?',
@@ -28,8 +27,6 @@ const THREAD_QUERY = {
     NEW_POST: 'INSERT INTO posts (idthread, iduser, content, title) VALUES (?, ?, ?, ?)',
     DELETE_THREAD: 'DELETE FROM threads WHERE idthread = ?',
     UPDATE_TITLE: 'UPDATE threads SET title = ? WHERE idthread = ?',
-    UPDATE_FOLLOWONLY: 'UPDATE threads SET follow_only = ? WHERE idthread = ?',
-    UPDATE_IMAGE: 'UPDATE threads SET img_url = ? WHERE idthread = ?',
     SUBSCRIBE_TO_THREAD: 'INSERT INTO subscriptions (iduser, idthread) VALUES (?, ?)',
     UNSUBSCRIBE_TO_THREAD: 'DELETE FROM subscriptions WHERE iduser = ? AND idthread = ?'
 };
@@ -52,8 +49,6 @@ const COMMENT_QUERY = {
 
     SELECT_COMMENT: 'SELECT * FROM commentaries WHERE idcom = ?',
     DELETE_COMMENT: 'DELETE FROM commentaries WHERE idcom = ?',
-    SELECT_SUBCOMMENTS: 'SELECT * FROM sub_commentaries WHERE idcom = ?',
-    SELECT_SUBCOMMENT: 'SELECT * FROM sub_commentaries WHERE idsubcom = ?',
     ADD_LIKE_COMMENT: 'INSERT INTO comments_likes (idcom, iduser) VALUES (?, ?)',
     UPDATE_PINNED: 'UPDATE commentaries SET pinned = ? WHERE idcom = ?',
 }

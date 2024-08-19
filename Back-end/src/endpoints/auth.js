@@ -15,9 +15,6 @@ const { USER_QUERY: QUERY } = require('../../db/query');
 
 
 
-
-
-
 /* USER AUTHENTICATION AND SESSION MANAGEMENT  */
 
 router.post('/login', (req, res, next) => {
@@ -44,7 +41,7 @@ router.post('/login', (req, res, next) => {
 router.get('/logout', (req, res) => {
     if (!req.user) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'User not authenticated' });
     req.logout((error) => {
-        if (error) return res.status(400).json({ error: { code: 400, status: 'Bad Request', message: 'Logout failed' } });
+        if (error) return res.status(400).json({ code: 400, status: 'Bad Request', message: 'Logout failed' });
         res.status(200).json({ code: 200, status: 'OK', message: 'You have been logged out' });
     })
 

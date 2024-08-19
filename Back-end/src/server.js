@@ -1,14 +1,12 @@
 const express = require('express');
-//onst https = require('https');
-const http = require('http'); // Use HTTP instead of HTTPS
+const http = require('http');
 const cors = require('cors')
 
 const session = require('express-session');
 const sessionStore = require('./session_store');
 const passport = require('passport');
 
-//const fs = require('fs');
-//const path = require('path');
+
 
 const PORT = 8000;
 const app = express();
@@ -24,9 +22,9 @@ const followEndpoints = require('./endpoints/follow');
 
 app.use(express.json());
 const corsOptions = {
-    origin: 'http://localhost:3000', // Your frontend's origin
-    credentials: true, // This allows the server to accept cookies from the client
-    optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    origin: 'http://localhost:3000', // my react-app
+    credentials: true,
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -38,7 +36,7 @@ app.use(session({
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 * 60, }
+    cookie: { maxAge: 60000 * 120, }
 })
 );
 app.use(passport.initialize());
@@ -59,15 +57,8 @@ app.all('*', (req, res) => { res.status(404).json({ error: { code: 404, status: 
 
 
 
-/* commented out since not working with axios
-const options = {
-    key: fs.readFileSync(path.resolve(__dirname, '../cert/key.pem')),
-    cert: fs.readFileSync(path.resolve(__dirname, '../cert/cert.pem'))
-};
-const server = https.createServer(options, app);
-*/
 
-const server = http.createServer(app); // Create HTTP server
+const server = http.createServer(app);
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });

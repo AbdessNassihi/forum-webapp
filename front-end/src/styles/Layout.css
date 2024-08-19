@@ -31,7 +31,7 @@
 .lstGroup-container{
 
   margin-top: 180px;
-  width: auto; /* Fixed or responsive width */
+  width: auto; 
   height: auto;
   align-self: flex-start;
 
@@ -65,8 +65,8 @@
 }
 
 .profile-img {
-  width: 35px; /* Adjust size as needed */
-  height: 35px; /* Adjust size as needed */
+  width: 35px; 
+  height: 35px; 
   border-radius: 50%;
   margin-bottom: 20px;
 

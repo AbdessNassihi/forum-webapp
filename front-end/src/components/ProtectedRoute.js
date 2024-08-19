@@ -12,7 +12,7 @@ const ProtectedRoute = ({ element }) => {
     }
 
     if (!user) {
-        return <Navigate to="/login" state={{ showToast: true, message: 'You need to be logged in to access this page.', toastType: 'error' }} />;
+        return <Navigate to="/login" state={{ showToast: true, message: 'Log to your account.', toastType: 'error' }} />;
     }
 
     return element;

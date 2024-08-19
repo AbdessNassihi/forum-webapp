@@ -40,7 +40,7 @@ router.get('users/:iduser', async (req, res) => {
         if (rows.length > 0) {
             res.status(200).json({ code: 200, status: 'OK', message: 'Threads of user retrieved successfully', data: rows[0] });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Threads of user not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'Threads of user not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving threads of user', log: error.message } });
@@ -58,7 +58,7 @@ router.get('/:idthread', async (req, res) => {
         if (rows.length > 0) {
             res.status(200).json({ code: 200, status: 'OK', message: 'Thread retrieved successfully', data: rows[0] });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'Thread not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving thread', log: error.message } });
@@ -122,7 +122,7 @@ router.put('/title/:idthread', validateThreadTitle, async (req, res) => {
         const { title } = req.body;
         const result = await database.query(QUERY.UPDATE_TITLE, [title, idthread]);
 
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Thread not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Thread title updated successfully' });
 
     } catch (error) {
@@ -135,10 +135,9 @@ router.put('/title/:idthread', validateThreadTitle, async (req, res) => {
 // Deleting a thread
 router.delete('/:idthread', async (req, res) => {
     try {
-        console.log('test');
         const idthread = parseInt(req.params.idthread);
         const result = await database.query(QUERY.DELETE_THREAD, [idthread]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Thread not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Thread not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Thread deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while deleting thread', log: error.message } });

@@ -1,17 +1,17 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Home from "./pages/Home";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import NewPost from './pages/CreatePost';
-import NewThread from './pages/CreateThread';
-import UpdateThread from './pages/EditThread';
-import UpdatePost from './pages/EditPost';
-import ExploreComp from './pages/Explore';
-import Posts from './pages/Posts';
-import Post from './pages/Post';
-import ProfileUser from './pages/UserProfile';
+import Register from "./pages/authentication/RegisterPage";
+import Login from "./pages/authentication/LoginPage";
+import Profile from "./pages/profile/ProfilePage";
+import NewPost from './pages/posts/PostCreationPage';
+import NewThread from './pages/threads/ThreadCreationPage';
+import UpdateThread from './pages/threads/ThreadUpdatingPage';
+import UpdatePost from './pages/posts/PostUpdating';
+import ExploreComponent from './pages/threads/ThreadsExploringPage';
+import ThreadPosts from './pages/posts/PostsOfThreadPage';
+import Post from './pages/posts/PostPage';
+import ProfileMember from './pages/profile/ProfileMemberPage';
 import { UserProvider } from './context/UserContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -23,10 +23,10 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/posts/:idthread/:title" element={<Posts />} />
-                    <Route path="/explore" element={<ExploreComp />} />
+                    <Route path="/posts/:idthread/:title" element={<ProtectedRoute element={<ThreadPosts />} />} />
+                    <Route path="/explore" element={<ProtectedRoute element={<ExploreComponent />} />} />
                     <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
-                    <Route path="/profile/:username" element={<ProtectedRoute element={<ProfileUser />} />} />
+                    <Route path="/profile/:username" element={<ProtectedRoute element={<ProfileMember />} />} />
                     <Route path="/post/:idpost/:title" element={<ProtectedRoute element={<Post />} />} />
                     <Route path="/create/post" element={<ProtectedRoute element={< NewPost />} />} />
                     <Route path="/create/thread" element={<ProtectedRoute element={<NewThread />} />} />

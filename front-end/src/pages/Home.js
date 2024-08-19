@@ -1,10 +1,10 @@
-import React, { useContext, useState, useEffect } from 'react';
-import PostCard from '../components/Card';
+import { useContext, useState, useEffect } from 'react';
+import PostCard from '../components/posts/PostCard';
 import Layout from '../components/Layout';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/UserContext';
-import { apiCall } from '../utils/Api';
+import { apiCall } from '../services/api';
 
 function Home() {
     const { user, loading } = useContext(UserContext);
@@ -19,7 +19,7 @@ function Home() {
                     const response = await apiCall('get', '/posts');
                     setPosts(response.data.posts);
                 } catch (error) {
-                    toast.error('An error occurred. Please try again later.', { hideProgressBar: true, autoClose: 2000 });
+                    toast.error('An server side error has occured.', { hideProgressBar: true, autoClose: 2000 });
                 } finally {
                     setLoadingPosts(false);
                 }

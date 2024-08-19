@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-
+// Getting user info
 router.get('/:iduser', async (req, res) => {
     try {
         const iduser = parseInt(req.params.iduser);
@@ -38,18 +38,12 @@ router.get('/:iduser', async (req, res) => {
         const user = userRows[0];
 
         const [posts] = await database.query(POST_QUERY.SELECT_POSTS_OF_USER, [iduser]);
-
-
         const [createdThreads] = await database.query(THREAD_QUERY.SELECT_THREADS_OF_USER, [iduser]);
-
         const [followedThreads] = await database.query(THREAD_QUERY.SELECT_FOLLOWED_THREADS, [iduser]);
-
         const [[{ count: numFollowers }]] = await database.query(QUERY.COUNT_FOLLOWERS, [iduser]);
         const [[{ count: numFollowings }]] = await database.query(QUERY.COUNT_FOLLOWINGS, [iduser]);
 
-
         if (user) {
-
             const responseData = {
                 id: user.iduser,
                 isAdmin: user.is_admin,
@@ -66,13 +60,14 @@ router.get('/:iduser', async (req, res) => {
 
             res.status(200).json({ code: 200, status: 'OK', message: 'User retrieved successfully', user: responseData });
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving user', log: error.message } });
     }
 });
 
+// find user with username
 router.get('/username/:username', async (req, res) => {
     try {
         const username = req.params.username;
@@ -100,7 +95,7 @@ router.get('/:iduser/image/', async (req, res) => {
         if (rows.length > 0) {
             res.sendFile(path.join('/usr/code', rows[0].img_url));
         } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Image not found' } });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'Image not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving image of user', log: error.message } });
@@ -114,7 +109,7 @@ router.delete('/:iduser', async (req, res) => {
     try {
         const iduser = parseInt(req.params.iduser);
         const result = await database.query(QUERY.DELETE_USER, [iduser]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'User deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while deleting user', log: error.message } });
@@ -137,7 +132,7 @@ router.put('/username', validateUsernameReq, async (req, res) => {
 
         const { username } = req.body;
         const result = await database.query(QUERY.UPDATE_USERNAME, [username, iduser]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Username updated successfully', field: 'username', data: result });
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
@@ -156,7 +151,7 @@ router.put('/textuser', async (req, res) => {
         const iduser = req.user.iduser;
         const { textuser } = req.body;
         const result = await database.query(QUERY.UPDATE_TEXTUSER, [textuser, iduser]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Text user updated successfully', field: 'textuser', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating text user', log: error.message } });
@@ -189,7 +184,7 @@ router.put('/image', handleImageUpload, async (req, res) => {
         const [rows] = await database.query(QUERY.SELECT_USER, [iduser]);
         const imagePath = getImagePath(req, rows[0], true);
         const result = await database.query(QUERY.UPDATE_IMAGE, [imagePath, iduser]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Profile image updated successfully', field: 'image', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating profile image', log: error.message } });
@@ -200,7 +195,7 @@ router.put('/:iduser/admin', async (req, res) => {
     try {
         const iduser = parseInt(req.params.iduser);
         const result = await database.query(QUERY.UPDATE_STATUS, [iduser]);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'User not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Status updated successfully', field: 'image', data: result });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating status of user', log: error.message } });

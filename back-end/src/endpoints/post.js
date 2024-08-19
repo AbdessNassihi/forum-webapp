@@ -20,6 +20,7 @@ router.get('/:idpost', async (req, res) => {
     }
 });
 
+/* RETRIEVE THE POSTS FOR THE USER */
 router.get('/', async (req, res) => {
     try {
         const iduser = req.user.iduser;
@@ -37,7 +38,6 @@ router.get('/', async (req, res) => {
             res.status(404).json({ code: 404, status: 'Not Found', message: 'Posts not found', posts: [] });
         }
     } catch (error) {
-        console.log(error);
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving posts', log: error.message } });
     }
 });
@@ -82,7 +82,6 @@ router.put('/:idpost/pinned/:pin', async (req, res) => {
     try {
         const idpost = parseInt(req.params.idpost);
         const toPin = parseInt(req.params.pin);
-        console.log(toPin);
         const result = await database.query(QUERY.UPDATE_PINNED, [toPin, idpost]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Post not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Post (un)pinned successfully' });
@@ -96,7 +95,7 @@ router.delete('/:idpost', async (req, res) => {
     try {
         const idpost = parseInt(req.params.idpost);
         const result = await database.query(QUERY.DELETE_POST, idpost);
-        if (!result[0].affectedRows) return res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Post not found' } });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Post not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while deleting post', log: error.message } });
@@ -115,7 +114,6 @@ router.get('/:idpost/comments', async (req, res) => {
             res.status(404).json({ code: 404, status: 'Not Found', message: 'No comments found', comments: [] });
         }
     } catch (error) {
-        console.log(error);
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving comments of post', log: error.message } });
     }
 });
