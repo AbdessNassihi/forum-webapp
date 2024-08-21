@@ -15,6 +15,7 @@ const { USER_QUERY: QUERY } = require('../../db/query');
 
 
 
+
 /* USER AUTHENTICATION AND SESSION MANAGEMENT */
 
 router.post('/login', (req, res, next) => {
@@ -58,14 +59,17 @@ router.get('/status', (req, res) => {
 router.post('/register', validateAllReq, async (req, res) => {
 
     try {
-        const { username, email, password, is_admin, textuser } = req.body;
+        const count = await database.query(QUERY.COUNT_USERS);
+        console.log('THE COUNT IS', count);
+        const is_admin = count[0][0].userCount == 0 ? 1 : 0;
+        const { username, email, password, textuser } = req.body;
         const imagePath = getImagePath(req, null, true);
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
         const result = await database.query(QUERY.NEW_USER, [email, username, hashedPassword, is_admin, imagePath, textuser, salt]);
 
         if (!result[0].affectedRows) throw new Error('User registration failed');
-        return res.status(201).json({ code: 201, status: 'Created', message: 'User registered successfully', data: result });
+        return res.status(201).json({ code: 201, status: 'Created', message: 'User registered successfully' });
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
             let errors = [];

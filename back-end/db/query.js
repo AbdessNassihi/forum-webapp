@@ -2,10 +2,10 @@ const USER_QUERY = {
     SELECT_USER: 'SELECT * FROM users WHERE iduser = ?',
     FIND_USER_AUTH: 'SELECT * FROM users where username = ?',
     FIND_USER: 'SELECT users.iduser, users.username, users.email, users.textuser, users.is_admin, (SELECT COUNT(*) FROM user_follows WHERE user_follows.idfollowing = users.iduser) AS num_followers, (SELECT COUNT(*) FROM user_follows WHERE user_follows.idfollower = users.iduser) AS num_followings, EXISTS (SELECT 1 FROM user_follows WHERE user_follows.idfollower = ? AND user_follows.idfollowing = users.iduser) AS is_following FROM users WHERE users.username = ?',
-    NEW_USER: 'INSERT INTO users (email, username, password, is_admin, img_url, textuser, salt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    NEW_USER: 'INSERT INTO users (email, username, password, is_admin, img_url, textuser) VALUES (?, ?, ?, ?, ?, ?)',
     UPDATE_USERNAME: 'UPDATE users SET username = ? WHERE iduser = ?',
     UPDATE_TEXTUSER: 'UPDATE users SET textuser = ? WHERE iduser = ?',
-    UPDATE_PASSWORD: 'UPDATE users SET password = ?, salt = ? WHERE iduser = ?',
+    UPDATE_PASSWORD: 'UPDATE users SET password = ? WHERE iduser = ?',
     UPDATE_IMAGE: 'UPDATE users SET img_url = ? WHERE iduser = ?',
     UPDATE_STATUS: 'UPDATE users SET is_admin = 1 WHERE iduser = ?',
     DELETE_USER: 'DELETE FROM users WHERE iduser = ?',
@@ -14,7 +14,8 @@ const USER_QUERY = {
     SELECT_FOLLOWERS: 'SELECT * FROM users INNER JOIN user_follows ON users.iduser = user_follows.idfollower WHERE user_follows.idfollowing = ?',
     SELECT_FOLLOWING: 'SELECT * FROM users INNER JOIN user_follows ON users.iduser = user_follows.idfollowing WHERE user_follows.idfollower = ?',
     COUNT_FOLLOWERS: 'SELECT COUNT(*) AS count FROM user_follows WHERE idfollowing = ?',
-    COUNT_FOLLOWINGS: 'SELECT COUNT(*) AS count FROM user_follows WHERE idfollower = ?'
+    COUNT_FOLLOWINGS: 'SELECT COUNT(*) AS count FROM user_follows WHERE idfollower = ?',
+    COUNT_USERS: 'SELECT COUNT(*) AS userCount FROM users'
 };
 
 const THREAD_QUERY = {

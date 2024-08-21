@@ -15,7 +15,7 @@ const UserCard = ({ username }) => {
     const { isAdmin } = useUserData(user, navigate);
     const [userData, setUserData] = useState({
         iduser: null,
-        is_admin: null,
+        is_admin: 0,
         email: '',
         textuser: '',
         numFollowers: 0,
@@ -151,7 +151,10 @@ const UserCard = ({ username }) => {
                             width="110"
                         />
                         <div className="mt-3">
-                            <h4>{username}</h4>
+                            <h4>
+                                {username}
+                                {userData.is_admin === '1' && <span className="text-warning">(Admin)</span>}
+                            </h4>
                             <p className="text-secondary mb-1">{userData.email}</p>
                             <p className="text-secondary mb-1">{userData.textuser}</p>
                         </div>
@@ -182,7 +185,7 @@ const UserCard = ({ username }) => {
                     <Button variant="primary" onClick={handleFollow} className="mx-2">
                         {isFollowing ? "Unfollow" : "Follow"}
                     </Button>
-                    {userData.is_admin === null && isAdmin && (
+                    {userData.is_admin === 0 && isAdmin && (
                         <>
                             <Button variant="primary" className="mx-2" onClick={handleSetAdmin}>
                                 Set as admin

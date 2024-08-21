@@ -31,22 +31,6 @@ router.get('/', async (req, res) => {
 
 
 
-// selecting all the threads of a user
-router.get('users/:iduser', async (req, res) => {
-
-    try {
-        const iduser = parseInt(req.params.iduser);
-        const [rows] = await database.query(QUERY.SELECT_THREADS_OF_USER, [iduser]);
-        if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Threads of user retrieved successfully', data: rows[0] });
-        } else {
-            res.status(404).json({ code: 404, status: 'Not Found', message: 'Threads of user not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving threads of user', log: error.message } });
-    }
-
-});
 
 
 // selecting a thread
@@ -67,21 +51,6 @@ router.get('/:idthread', async (req, res) => {
 });
 
 
-// selecting image of a thread
-router.get('/images/:idthread', async (req, res) => {
-    try {
-        const idthread = parseInt(req.params.idthread);
-        const [rows] = await database.query(QUERY.SELECT_THREAD, [idthread]);
-        if (rows.length > 0) {
-            res.sendFile(path.join('/usr/code', rows[0].img_url));
-        } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'Image of thread not found' } });
-        }
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving image of thread', log: error.message } });
-    }
-
-});
 
 
 /* Creating threads */
@@ -95,7 +64,7 @@ router.post('/', validateThreadTitle, async (req, res) => {
         const result = await database.query(QUERY.NEW_THREAD, [iduser, title, textthread]);
 
         if (!result[0].affectedRows) throw new Error('Thread creation failed');
-        res.status(201).json({ code: 201, status: 'Created', message: 'Thread created successfully', data: result });
+        res.status(201).json({ code: 201, status: 'Created', message: 'Thread created successfully' });
 
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
@@ -135,6 +104,7 @@ router.put('/title/:idthread', validateThreadTitle, async (req, res) => {
 // Deleting a thread
 router.delete('/:idthread', async (req, res) => {
     try {
+        if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });
         const idthread = parseInt(req.params.idthread);
         const result = await database.query(QUERY.DELETE_THREAD, [idthread]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Thread not found' });
@@ -145,7 +115,7 @@ router.delete('/:idthread', async (req, res) => {
 });
 
 
-/* RETRIEVING POSTS */
+/* RETRIEVING POSTS OF THREAD*/
 router.get('/:idthread/posts', async (req, res) => {
     try {
         const idthread = parseInt(req.params.idthread);
@@ -161,15 +131,15 @@ router.get('/:idthread/posts', async (req, res) => {
 
 });
 
-/* CREATING POSTS */
+/* CREATING POSTS IN THREAD */
 router.post('/:idthread/posts', async (req, res) => {
     try {
         const idthread = parseInt(req.params.idthread);
         const iduser = req.user.iduser;
         const { content, title } = req.body;
         const result = await database.query(QUERY.NEW_POST, [idthread, iduser, content, title]);
-        if (!result[0].affectedRows) throw new Error('Post creation failed');
-        res.status(201).json({ code: 201, status: 'Created', message: 'Post created successfully', data: result });
+        if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Thread not found' });
+        res.status(201).json({ code: 201, status: 'Created', message: 'Post created successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while creating post', log: error.message } });
 

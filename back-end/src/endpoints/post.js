@@ -20,7 +20,7 @@ router.get('/:idpost', async (req, res) => {
     }
 });
 
-/* RETRIEVE THE POSTS FOR THE USER */
+/* RETRIEVE THE POSTS FOR THE USER FEED */
 router.get('/', async (req, res) => {
     try {
         const iduser = req.user.iduser;
@@ -93,6 +93,7 @@ router.put('/:idpost/pinned/:pin', async (req, res) => {
 // Deleting a post
 router.delete('/:idpost', async (req, res) => {
     try {
+        if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });
         const idpost = parseInt(req.params.idpost);
         const result = await database.query(QUERY.DELETE_POST, idpost);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Post not found' });
@@ -126,7 +127,7 @@ router.post('/:idpost/comments', async (req, res) => {
         const { content } = req.body;
         const result = await database.query(QUERY.NEW_COMMENT, [idpost, iduser, content]);
         if (!result[0].affectedRows) throw new Error('Comment creation failed');
-        res.status(201).json({ code: 201, status: 'Created', message: 'Comment created successfully', data: result });
+        res.status(201).json({ code: 201, status: 'Created', message: 'Comment created successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while creating comment', log: error.message } });
     }

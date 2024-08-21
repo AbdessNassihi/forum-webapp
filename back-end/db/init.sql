@@ -2,20 +2,17 @@ CREATE DATABASE IF NOT EXISTS forumdb;
 
 USE forumdb;
 
-
 CREATE TABLE IF NOT EXISTS users (
     iduser INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    is_admin TINYINT  DEFAULT 0,
+    is_admin TINYINT DEFAULT 0, 
     img_url VARCHAR(800) NOT NULL,
     textuser VARCHAR(800) NOT NULL,
-    salt VARCHAR(800) NOT NULL,
     PRIMARY KEY (iduser),
-    UNIQUE INDEX iduser_UNIQUE (iduser ASC) VISIBLE,
-    UNIQUE INDEX username_UNIQUE (username ASC) VISIBLE,
-    UNIQUE INDEX email_UNIQUE (email ASC) VISIBLE
+    UNIQUE INDEX username_UNIQUE (username ASC),
+    UNIQUE INDEX email_UNIQUE (email ASC)
 );
 
 

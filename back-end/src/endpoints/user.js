@@ -16,19 +16,6 @@ const { getImagePath, handleImageUpload } = require('../imagesUtils');
 
 /* RETRIEVING AND DELETEING USERS */
 
-// Selecting all users
-router.get('/', async (req, res) => {
-    try {
-        const [rows] = await database.query(QUERY.SELECT_USERS);
-        if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Users retrieved successfully', data: rows });
-        } else {
-            res.status(404).json({ error: { code: 404, status: 'Not Found', message: 'No users found' } });
-        }
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving users', log: error.message } });
-    }
-});
 
 // Getting user info
 router.get('/:iduser', async (req, res) => {
@@ -95,7 +82,7 @@ router.get('/:iduser/image/', async (req, res) => {
         if (rows.length > 0) {
             res.sendFile(path.join('/usr/code', rows[0].img_url));
         } else {
-            res.status(404).json({ code: 404, status: 'Not Found', message: 'Image not found' });
+            res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         }
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving image of user', log: error.message } });
@@ -107,6 +94,7 @@ router.get('/:iduser/image/', async (req, res) => {
 // Deleting a user
 router.delete('/:iduser', async (req, res) => {
     try {
+        if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });
         const iduser = parseInt(req.params.iduser);
         const result = await database.query(QUERY.DELETE_USER, [iduser]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
@@ -133,7 +121,7 @@ router.put('/username', validateUsernameReq, async (req, res) => {
         const { username } = req.body;
         const result = await database.query(QUERY.UPDATE_USERNAME, [username, iduser]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
-        res.status(200).json({ code: 200, status: 'OK', message: 'Username updated successfully', field: 'username', data: result });
+        res.status(200).json({ code: 200, status: 'OK', message: 'Username updated successfully', field: 'username' });
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
             let errors = [];
@@ -154,7 +142,7 @@ router.put('/textuser', async (req, res) => {
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
         res.status(200).json({ code: 200, status: 'OK', message: 'Text user updated successfully', field: 'textuser', data: result });
     } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating text user', log: error.message } });
+        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating text of user', log: error.message } });
     }
 });
 
@@ -169,7 +157,7 @@ router.put('/password', validatePasswordReq, async (req, res) => {
         const { password } = req.body;
         const salt = bcrypt.genSaltSync(saltRounds);
         const hashedPassword = bcrypt.hashSync(password, salt);
-        const result = await database.query(QUERY.UPDATE_PASSWORD, [hashedPassword, salt, iduser]);
+        const result = await database.query(QUERY.UPDATE_PASSWORD, [hashedPassword, iduser]);
         if (!result[0].affectedRows) throw new Error('Updating password failed');
         res.status(200).json({ code: 200, status: 'OK', message: 'Password updated successfully', field: 'password', data: result });
     } catch (error) {
@@ -185,7 +173,7 @@ router.put('/image', handleImageUpload, async (req, res) => {
         const imagePath = getImagePath(req, rows[0], true);
         const result = await database.query(QUERY.UPDATE_IMAGE, [imagePath, iduser]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
-        res.status(200).json({ code: 200, status: 'OK', message: 'Profile image updated successfully', field: 'image', data: result });
+        res.status(200).json({ code: 200, status: 'OK', message: 'Profile image updated successfully', field: 'image' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating profile image', log: error.message } });
     }
@@ -193,10 +181,11 @@ router.put('/image', handleImageUpload, async (req, res) => {
 
 router.put('/:iduser/admin', async (req, res) => {
     try {
+        if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });
         const iduser = parseInt(req.params.iduser);
         const result = await database.query(QUERY.UPDATE_STATUS, [iduser]);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'User not found' });
-        res.status(200).json({ code: 200, status: 'OK', message: 'Status updated successfully', field: 'image', data: result });
+        res.status(200).json({ code: 200, status: 'OK', message: 'Status updated successfully' });
     } catch (error) {
         res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while updating status of user', log: error.message } });
     }

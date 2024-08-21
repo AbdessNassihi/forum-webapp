@@ -5,23 +5,9 @@ const database = require('../../db/dbconnection');
 const { COMMENT_QUERY: QUERY } = require('../../db/query');
 
 
-/* RETRIEVING A COMMENT */
-router.get('/:idcomment', async (req, res) => {
-    try {
-        const idcomment = parseInt(req.params.idcomment);
-        const [rows] = await database.query(QUERY.SELECT_COMMENT, [idcomment]);
-        if (rows.length > 0) {
-            res.status(200).json({ code: 200, status: 'OK', message: 'Comment retrieved successfully', data: rows[0] });
-        } else {
-            res.status(404).json({ code: 404, status: 'Not Found', message: 'Comment not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: { code: 500, status: 'Internal Server Error', message: 'Error while retrieving comment', log: error.message } });
-    }
 
-});
 
-// Liking a comment
+/* LIKING A COMMENT */
 router.post('/:idcom/like', async (req, res) => {
 
     try {
@@ -45,6 +31,7 @@ router.post('/:idcom/like', async (req, res) => {
 /* DELETING A COMMENT */
 router.delete('/:idcomment', async (req, res) => {
     try {
+        if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });
         const idcomment = parseInt(req.params.idcomment);
         const result = await database.query(QUERY.DELETE_COMMENT, idcomment);
         if (!result[0].affectedRows) return res.status(404).json({ code: 404, status: 'Not Found', message: 'Comment not found' });
