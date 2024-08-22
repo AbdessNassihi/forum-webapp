@@ -41,7 +41,7 @@ const PostsOfThread = ({ idthread }) => {
                             <>{
                                 posts.length > 0 ? (
                                     posts.map((post) => (
-                                        <PostCard post={post} onDelete={handleDeletePost} />
+                                        <PostCard key={post.idpost} post={post} onDelete={handleDeletePost} />
                                     ))
                                 ) : (
                                     <div className="alert alert-light" role="alert">

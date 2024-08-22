@@ -46,7 +46,7 @@ function Home() {
                 ) : user ? (
                     posts.length > 0 ? (
                         posts.map((post) => {
-                            return <PostCard post={post} onDelete={handleDeletePost} />;
+                            return <PostCard key={post.idpost} post={post} onDelete={handleDeletePost} />;
                         })
                     ) : (
                         <div className="alert alert-light" role="alert">

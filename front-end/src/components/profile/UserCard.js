@@ -153,7 +153,7 @@ const UserCard = ({ username }) => {
                         <div className="mt-3">
                             <h4>
                                 {username}
-                                {userData.is_admin === '1' && <span className="text-warning">(Admin)</span>}
+                                {userData.is_admin ? (<span className="text-secondary">{' '}(Admin)</span>) : (null)}
                             </h4>
                             <p className="text-secondary mb-1">{userData.email}</p>
                             <p className="text-secondary mb-1">{userData.textuser}</p>

@@ -95,9 +95,9 @@ function PostCard({ post, onDelete }) {
                 <BootstrapCard.Link href="#" onClick={() => navigate(`/post/${post.idpost}/${post.title}`)} className={Styles['card-link']}>
                     <FontAwesomeIcon icon={faCommentAlt} /> {post.num_commentaries}
                 </BootstrapCard.Link>
-                {isAdmin && <BootstrapCard.Link href="#" onClick={handleDeleteClick} className={Styles['card-link']}>
+                {isAdmin ? (<BootstrapCard.Link href="#" onClick={handleDeleteClick} className={Styles['card-link']}>
                     <FontAwesomeIcon icon={faTrashAlt} />
-                </BootstrapCard.Link>}
+                </BootstrapCard.Link>) : (null)}
             </div>
             {post.post_username ? (
                 <BootstrapCard.Text className={Styles['card-date']}>{timeAgo}</BootstrapCard.Text>

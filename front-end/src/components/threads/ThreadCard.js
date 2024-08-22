@@ -97,9 +97,9 @@ function ThreadCard({ thread, onDelete }) {
             <BootstrapCard.Link href="#" onClick={() => navigate(`/posts/${thread.idthread}/${thread.title}`)} className={Styles['card-link']} style={{ textDecoration: 'underline' }}>
                 Explore
             </BootstrapCard.Link>
-            {isAdmin && <BootstrapCard.Link href="#" onClick={handleDeleteClick} className={Styles['card-link']}>
+            {isAdmin ? (<BootstrapCard.Link href="#" onClick={handleDeleteClick} className={Styles['card-link']}>
                 <FontAwesomeIcon icon={faTrashAlt} />
-            </BootstrapCard.Link>}
+            </BootstrapCard.Link>) : (null)}
         </div>
     );
 

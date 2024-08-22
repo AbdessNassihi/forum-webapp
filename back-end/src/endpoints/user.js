@@ -179,6 +179,7 @@ router.put('/image', handleImageUpload, async (req, res) => {
     }
 });
 
+// setting user as admin
 router.put('/:iduser/admin', async (req, res) => {
     try {
         if (!req.user.is_admin) return res.status(401).json({ code: 401, status: 'Unauthorized', message: 'Operation requires to be an admin' });

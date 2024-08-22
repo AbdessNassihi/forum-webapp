@@ -53,7 +53,7 @@ router.get('/:idthread', async (req, res) => {
 
 
 
-/* Creating threads */
+/* CREATING A THREAD */
 router.post('/', validateThreadTitle, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) { return res.status(400).json({ code: 400, status: 'Bad Request', errors: errors.array() }); }

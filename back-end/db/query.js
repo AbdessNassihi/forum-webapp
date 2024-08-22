@@ -47,7 +47,6 @@ const POST_QUERY = {
 };
 
 const COMMENT_QUERY = {
-
     SELECT_COMMENT: 'SELECT * FROM commentaries WHERE idcom = ?',
     DELETE_COMMENT: 'DELETE FROM commentaries WHERE idcom = ?',
     ADD_LIKE_COMMENT: 'INSERT INTO comments_likes (idcom, iduser) VALUES (?, ?)',
