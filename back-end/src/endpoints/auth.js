@@ -60,7 +60,6 @@ router.post('/register', validateAllReq, async (req, res) => {
 
     try {
         const count = await database.query(QUERY.COUNT_USERS);
-        console.log('THE COUNT IS', count);
         const is_admin = count[0][0].userCount == 0 ? 1 : 0;
         const { username, email, password, textuser } = req.body;
         const imagePath = getImagePath(req, null, true);
